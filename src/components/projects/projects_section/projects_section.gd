@@ -13,7 +13,7 @@ var path:String:
 var is_root:bool = false:
 	set(x):
 		is_root = x
-		fix_hideable()
+		fix_is_root()
 
 var open:bool:
 	set(x):
@@ -30,17 +30,33 @@ var _open:bool
 
 func _ready():
 	_open = !Config.CLOSED_SECTIONS.ret().has(path)
+	fix_is_root()
 	fix_hideable()
 	head_button.text = path
 	head_button.pressed.connect(_on_pressed_head_button)
+
+func fix_is_root() -> void:
+	if !is_node_ready():
+		return
+	if is_root:
+		head_button.hide()
+		hideable.visible = true
+		$ColorRect.hide()
+		$Indenter/ColorRect.hide()
+		$Indenter/Spacer.hide()
+	else:
+		head_button.show()
+		fix_hideable()
+		$ColorRect.show()
+		$Indenter/ColorRect.show()
+		$Indenter/Spacer.show()
 
 func fix_hideable() -> void:
 	if !is_node_ready():
 		return
 	if is_root:
-		head_button.icon = null
-		hideable.visible = true
 		return
+
 	if _open:
 		head_button.icon = get_theme_icon("GuiTreeArrowDown", "EditorIcons")
 	else:
