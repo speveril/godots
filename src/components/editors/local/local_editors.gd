@@ -25,7 +25,7 @@ func _ready() -> void:
 	
 	var remove_missing_popup := RemoveMissingDialog.new(_remove_missing)
 	add_child(remove_missing_popup)
-	
+
 	var actions := Action.List.new([
 		Action.from_dict({
 			"key": "import",
@@ -73,7 +73,7 @@ func _ready() -> void:
 			"act": func() -> void: remove_missing_popup.popup_centered()
 		}),
 	])
-	
+
 	_remove_missing_action = actions.by_key("remove-missing")
 
 	var editor_actions := TabActions.Menu.new(
@@ -81,9 +81,9 @@ func _ready() -> void:
 			'import',
 			'download',
 			'scan',
-		]).all(), 
+		]).all(),
 		TabActions.Settings.new(
-			Cache.section_of(self), 
+			Cache.section_of(self),
 			[
 				'import',
 				'download',
@@ -93,7 +93,7 @@ func _ready() -> void:
 	)
 	editor_actions.add_controls_to_node(%EditorsList/HBoxContainer/TabActions as Control)
 	editor_actions.icon = get_theme_icon("GuiTabMenuHl", "EditorIcons")
-	
+
 	%EditorsList/HBoxContainer.add_child(_remove_missing_action.to_btn().make_flat(true).show_text(false))
 	%EditorsList/HBoxContainer.add_child(actions.by_key('orphan').to_btn().make_flat(true).show_text(false))
 	%EditorsList/HBoxContainer.add_child(actions.by_key('refresh').to_btn().make_flat(true).show_text(false))

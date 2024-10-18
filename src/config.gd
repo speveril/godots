@@ -7,7 +7,7 @@ signal saved
 var AUTO_EDSCALE := 1.
 var EDSCALE := 1.
 var AGENT := ""
-const VERSION = "v1.4.stable"
+const VERSION = "v1.4.kdf"
 const APP_CONFIG_PATH = "user://godots.cfg"
 const EDITORS_CONFIG_PATH = "user://editors.cfg"
 const PROJECTS_CONFIG_PATH = "user://projects.cfg"
@@ -28,7 +28,7 @@ var _cfg_auto_save := ConfigFileSaveOnSet.new(
 	APP_CONFIG_PATH, 
 	func(err: Error) -> void:
 		if err == OK:
-			saved.emit() 
+			saved.emit()
 		pass\
 )
 
@@ -42,7 +42,7 @@ var VERSIONS_PATH := ConfigFileValue.new(
 	"app", 
 	"versions_path",
 	DEFAULT_VERSIONS_PATH
-).map_return_value(_simplify_path): 
+).map_return_value(_simplify_path):
 	set(_v): _readonly()
 
 
@@ -51,7 +51,7 @@ var DOWNLOADS_PATH := ConfigFileValue.new(
 	"app", 
 	"downloads_path",
 	DEFAULT_DOWNLOADS_PATH
-).map_return_value(_simplify_path): 
+).map_return_value(_simplify_path):
 	set(_v): _readonly()
 
 
@@ -60,7 +60,7 @@ var CACHE_DIR_PATH := ConfigFileValue.new(
 	"app", 
 	"cache_dir_path",
 	DEFAULT_CACHE_DIR_PATH
-).map_return_value(_simplify_path): 
+).map_return_value(_simplify_path):
 	set(_v): _readonly()
 
 
@@ -69,7 +69,7 @@ var UPDATES_PATH := ConfigFileValue.new(
 	"app", 
 	"updates_path",
 	DEFAULT_UPDATES_PATH
-).map_return_value(_simplify_path): 
+).map_return_value(_simplify_path):
 	set(_v): _readonly()
 
 
@@ -78,7 +78,7 @@ var DEFAULT_PROJECTS_PATH := ConfigFileValue.new(
 	"app", 
 	"projects_path",
 	OS.get_system_dir(OS.SYSTEM_DIR_DOCUMENTS)
-).map_return_value(_simplify_path): 
+).map_return_value(_simplify_path):
 	set(_v): _readonly()
 
 
@@ -95,7 +95,7 @@ var SAVED_EDSCALE := ConfigFileValue.new(
 	_cfg_auto_save.as_config_like(), 
 	_EDITOR_PROXY_SECTION_NAME, 
 	"interface/editor/custom_display_scale"
-): 
+):
 	set(_v): _readonly()
 
 
@@ -104,7 +104,7 @@ var DEFAULT_EDITOR_TAGS := ConfigFileValue.new(
 	"app", 
 	"default_editor_tags",
 	["dev", "rc", "alpha", "4.x", "3.x", "stable", "mono"]
-): 
+):
 	set(_v): _readonly()
 
 
@@ -113,7 +113,7 @@ var DEFAULT_PROJECT_TAGS := ConfigFileValue.new(
 	"app", 
 	"default_project_tags",
 	[]
-): 
+):
 	set(_v): _readonly()
 
 
@@ -122,7 +122,7 @@ var AUTO_CLOSE := ConfigFileValue.new(
 	"app", 
 	"auto_close",
 	false
-): 
+):
 	set(_v): _readonly()
 
 
@@ -131,7 +131,7 @@ var SHOW_ORPHAN_EDITOR := ConfigFileValue.new(
 	"app", 
 	"show_orphan_editor",
 	false
-): 
+):
 	set(_v): _readonly()
 
 
@@ -140,7 +140,7 @@ var USE_SYSTEM_TITLE_BAR := ConfigFileValue.new(
 	"app", 
 	"use_system_titlebar",
 	false
-): 
+):
 	set(_v): _readonly()
 
 
@@ -158,7 +158,7 @@ var LAST_WINDOW_RECT := ConfigFileValue.new(
 	"app", 
 	"last_window_rect",
 	Rect2i()
-): 
+):
 	set(_v): _readonly()
 
 
@@ -167,16 +167,31 @@ var REMEMBER_WINDOW_SIZE := ConfigFileValue.new(
 	"app", 
 	"remember_window_size",
 	false
-): 
+):
 	set(_v): _readonly()
 
+var PROJECT_HIERARCHY = ConfigFileValue.new(
+	_cfg_auto_save,
+	"app",
+	"project_hierarchy",
+	{}
+):
+	set(_v): _readonly()
+
+var CLOSED_SECTIONS = ConfigFileValue.new(
+	_cfg_auto_save.as_config_like(),
+	"app",
+	"closed_sections",
+	[]
+):
+	set(_v): _readonly()
 
 var ALLOW_INSTALL_TO_NOT_EMPTY_DIR := ConfigFileValue.new(
 	_cfg_auto_save.as_config_like(), 
 	"app", 
 	"allow_install_to_not_empty_dir",
 	false
-): 
+):
 	set(_v): _readonly()
 
 
@@ -185,7 +200,7 @@ var ONLY_STABLE_UPDATES := ConfigFileValue.new(
 	"app", 
 	"only_stable_updates",
 	true
-): 
+):
 	set(_v): _readonly()
 
 
@@ -194,7 +209,7 @@ var RANDOM_PROJECT_PREFIXES := ConfigFileValue.new(
 	"random-project-names", 
 	"prefixes",
 	[]
-): 
+):
 	set(_v): _readonly()
 
 
@@ -203,7 +218,7 @@ var RANDOM_PROJECT_TOPICS := ConfigFileValue.new(
 	"random-project-names", 
 	"topics",
 	[]
-): 
+):
 	set(_v): _readonly()
 
 
@@ -212,7 +227,7 @@ var RANDOM_PROJECT_SUFFIXES := ConfigFileValue.new(
 	"random-project-names", 
 	"suffixes",
 	[]
-): 
+):
 	set(_v): _readonly()
 
 
@@ -221,7 +236,7 @@ var GLOBAL_CUSTOM_COMMANDS_PROJECTS := ConfigFileValue.new(
 	"global-custom-commands-v2", 
 	"projects",
 	[]
-): 
+):
 	set(_v): _readonly()
 
 
@@ -261,7 +276,7 @@ var DIRECTORY_NAMING_CONVENTION := ConfigFileValue.new(
 	set(_v): _readonly()
 
 
-func _enter_tree() -> void:	
+func _enter_tree() -> void:
 	DirAccess.make_dir_absolute(ProjectSettings.globalize_path(DEFAULT_VERSIONS_PATH))
 	DirAccess.make_dir_absolute(ProjectSettings.globalize_path(DEFAULT_DOWNLOADS_PATH))
 	DirAccess.make_dir_absolute(ProjectSettings.globalize_path(DEFAULT_UPDATES_PATH))
@@ -275,8 +290,8 @@ func _enter_tree() -> void:
 	_random_project_names.set_topics(RANDOM_PROJECT_TOPICS.ret() as Array)
 	
 	AGENT = "Godots/%s (%s) Godot/%s" % [
-		VERSION, 
-		OS.get_name(), 
+		VERSION,
+		OS.get_name(),
 		Engine.get_version_info().string
 	]
 	_setup_scale()
@@ -318,7 +333,7 @@ func _get_auto_display_scale() -> float:
 func save() -> Error:
 	var err := _cfg.save(APP_CONFIG_PATH)
 	if err == OK:
-		saved.emit() 
+		saved.emit()
 	return err
 
 

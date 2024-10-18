@@ -1,0 +1,71 @@
+[gd_scene load_steps=5 format=3 uid="uid://c1bxi38cgar0a"]
+
+[ext_resource type="Script" path="res://src/components/projects/projects_section/projects_section.gd" id="1_stjll"]
+[ext_resource type="Texture2D" uid="uid://dc17ai8ghw5mx" path="res://theme/icons-light/GuiTreeArrowRight.svg" id="2_sqabc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jxv3i"]
+content_margin_left = 4.0
+content_margin_top = 8.0
+content_margin_right = 4.0
+content_margin_bottom = 8.0
+bg_color = Color(0.144063, 0.144063, 0.144062, 1)
+border_width_bottom = 2
+border_color = Color(0.219608, 0.219608, 0.219608, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fn0ux"]
+content_margin_left = 4.0
+content_margin_top = 8.0
+content_margin_right = 4.0
+content_margin_bottom = 8.0
+bg_color = Color(0.219608, 0.219608, 0.219608, 1)
+border_width_bottom = 2
+border_color = Color(0.219608, 0.219608, 0.219608, 1)
+
+[node name="ProjectsSection" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+script = ExtResource("1_stjll")
+
+[node name="HeadButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_jxv3i")
+theme_override_styles/hover = SubResource("StyleBoxFlat_fn0ux")
+text = "/path/"
+icon = ExtResource("2_sqabc")
+alignment = 0
+
+[node name="Indenter" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Indenter"]
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="Indenter"]
+custom_minimum_size = Vector2(2, 0)
+layout_mode = 2
+color = Color(0.219608, 0.219608, 0.219608, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Indenter"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SubSections" type="VBoxContainer" parent="Indenter/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Contents" type="VBoxContainer" parent="Indenter/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.219608, 0.219608, 0.219608, 1)

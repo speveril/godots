@@ -25,7 +25,7 @@ class List extends RefCounted:
 			project.editor_path = editor_path
 		_projects[project_path] = project
 		return project
-	
+
 	func all() -> Array[Item]:
 		var result: Array[Item] = []
 		for x: Item in _projects.values():
@@ -41,10 +41,13 @@ class List extends RefCounted:
 	func erase(project_path: String) -> void:
 		_projects.erase(project_path)
 		_cfg.erase_section(project_path)
+		var hierarchy := Config.PROJECT_HIERARCHY.ret()
+		hierarchy.erase(project_path)
+		Config.PROJECT_HIERARCHY.put(hierarchy)
 	
 	func get_editors_to_bind() -> Array[Dictionary]:
 		return _local_editors.as_option_button_items()
-	
+
 	func get_owners_of(editor: LocalEditors.Item) -> Array[Item]:
 		var result: Array[Item]
 		for project in all():
@@ -59,7 +62,7 @@ class List extends RefCounted:
 			for tag: String in project.tags:
 				set.append(tag.to_lower())
 		return set.values()
-	
+
 	func load() -> Error:
 		cleanup()
 		var err := _cfg.load(_cfg_path)
@@ -74,10 +77,10 @@ class List extends RefCounted:
 	
 	func cleanup() -> void:
 		dict.clear_and_free(_projects)
-	
+
 	func save() -> Error:
 		return _cfg.save(_cfg_path)
-	
+
 	func get_last_opened() -> Projects.Item:
 		var last_opened := _ProjectsCache.get_last_opened_project()
 		return retrieve(last_opened) if has(last_opened) else null
@@ -98,6 +101,13 @@ class Item:
 		get: return _external_project_info.name
 		set(value): _external_project_info.name = value
 	
+	var hierarchy:
+		set(value):
+			var hierarchy = Config.PROJECT_HIERARCHY.ret()
+			hierarchy[path] = value
+			Config.PROJECT_HIERARCHY.put(hierarchy)
+		get: return Config.PROJECT_HIERARCHY.ret().get(path, "")
+
 	var editor_name: String:
 		get: return _get_editor_name()
 	
@@ -107,16 +117,16 @@ class Item:
 	var favorite: bool:
 		get: return _section.get_value("favorite", false)
 		set(value): _section.set_value("favorite", value)
-	
+
 	var editor: LocalEditors.Item:
-		get: 
+		get:
 			if has_invalid_editor:
 				return null
 			return _local_editors.retrieve(editor_path)
 	
 	var editor_path: String:
 		get: return _section.get_value("editor_path", "")
-		set(value): 
+		set(value):
 			show_edit_warning = true
 			_section.set_value("editor_path", value)
 	
@@ -161,9 +171,9 @@ class Item:
 	var _external_project_info: ExternalProjectInfo
 	var _section: ConfigFileSection
 	var _local_editors: LocalEditors.List
-	
+
 	func _init(
-		section: ConfigFileSection, 
+		section: ConfigFileSection,
 		project_info: ExternalProjectInfo,
 		local_editors: LocalEditors.List
 	) -> void:
@@ -183,7 +193,7 @@ class Item:
 	
 	func load(with_icon:=true) -> void:
 		_external_project_info.load(with_icon)
-	
+
 	func editor_is(editor: LocalEditors.Item) -> bool:
 		if has_invalid_editor:
 			return false
@@ -201,7 +211,7 @@ class Item:
 	
 	func emit_internals_changed() -> void:
 		internals_changed.emit()
-	
+
 	func as_process(args: PackedStringArray) -> OSProcessSchema:
 		assert(not has_invalid_editor)
 		var editor := _local_editors.retrieve(editor_path)
@@ -211,7 +221,7 @@ class Item:
 		]
 		result_args.append_array(args)
 		return editor.as_process(result_args)
-	
+
 	func fmt_string(str: String) -> String:
 		if not has_invalid_editor:
 			var editor := _local_editors.retrieve(editor_path)
@@ -220,7 +230,7 @@ class Item:
 			'{{PROJECT_DIR}}', ProjectSettings.globalize_path(self.path).get_base_dir()
 		)
 		return str
-	
+
 	func as_fmt_process(process_path: String, args: PackedStringArray) -> OSProcessSchema:
 		var result_path := process_path
 		var result_args: PackedStringArray
@@ -261,8 +271,8 @@ class Item:
 				'path': '{{EDITOR_PATH}}',
 				'args': ['--path', '{{PROJECT_DIR}}' ,'-e'],
 				'allowed_actions': [
-					CommandViewer.Actions.EXECUTE, 
-					CommandViewer.Actions.EDIT, 
+					CommandViewer.Actions.EXECUTE,
+					CommandViewer.Actions.EDIT,
 					CommandViewer.Actions.CREATE_PROCESS
 				]
 			})
@@ -273,8 +283,8 @@ class Item:
 				'path': '{{EDITOR_PATH}}',
 				'args': ['--path', '{{PROJECT_DIR}}' ,'-g'],
 				'allowed_actions': [
-					CommandViewer.Actions.EXECUTE, 
-					CommandViewer.Actions.EDIT, 
+					CommandViewer.Actions.EXECUTE,
+					CommandViewer.Actions.EDIT,
 					CommandViewer.Actions.CREATE_PROCESS
 				]
 			})
@@ -313,15 +323,15 @@ class ExternalProjectInfo extends RefCounted:
 			var err := cfg.load(_project_path)
 			if not err:
 				cfg.set_value(
-					"application", 
-					"config/name", 
+					"application",
+					"config/name",
 					_name
 				)
 				cfg.save(_project_path)
-	
+
 	var has_version_hint: bool:
 		get: return _version_hint != null
-	
+
 	var version_hint: String:
 		get: return '' if _version_hint == null else _version_hint
 		set(value):
@@ -332,8 +342,8 @@ class ExternalProjectInfo extends RefCounted:
 			var err := cfg.load(_project_path)
 			if not err:
 				cfg.set_value(
-					"godots", 
-					"version_hint", 
+					"godots",
+					"version_hint",
 					_version_hint
 				)
 				cfg.save(_project_path)
@@ -360,8 +370,8 @@ class ExternalProjectInfo extends RefCounted:
 				for tag: String in _tags:
 					set.append(tag.to_lower())
 				cfg.set_value(
-					"application", 
-					"config/tags", 
+					"application",
+					"config/tags",
 					PackedStringArray(set.values())
 				)
 				cfg.save(_project_path)
@@ -406,12 +416,12 @@ class ExternalProjectInfo extends RefCounted:
 			_version_hint = cfg.get_value("godots", "version_hint")
 			if _version_hint == '':
 				_version_hint = null
-		
+
 		_last_modified = FileAccess.get_modified_time(_project_path)
 		if with_icon:
 			_icon = _load_icon(cfg)
 		_is_missing = bool(err)
-		
+
 		_is_loaded = true
 		loaded.emit()
 	
@@ -505,6 +515,6 @@ class ExternalProjectInfo extends RefCounted:
 				return true
 			if check_stable.call(b) && !check_stable.call(a):
 				return false
-			
+
 			return VersionHint.version_or_nothing(a) > VersionHint.version_or_nothing(b)
 		)

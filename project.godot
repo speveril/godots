@@ -57,6 +57,7 @@ import/fbx/enabled=false
 [godots]
 
 version_hint="4.5"
+hierarchy="third-party"
 
 [internationalization]
 

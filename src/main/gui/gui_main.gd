@@ -52,14 +52,14 @@ func _ready() -> void:
 			else:
 				zip_reader.close()
 				_remote_editors.install_zip(
-					file, 
-					file.get_file().replace(".zip", ""), 
+					file,
+					file.get_file().replace(".zip", ""),
 					utils.guess_editor_name(file.replace(".zip", ""))
 				)
 		else:
 			_local_editors.import(utils.guess_editor_name(file), file)
 	)
-	
+
 	_title_tabs.add_child(TitleTabButton.new("ProjectList", tr("Projects"), _tab_container, [_projects]))
 	_title_tabs.add_child(TitleTabButton.new("AssetLib", tr("Asset Library"), _tab_container, [_asset_lib_projects]))
 	_title_tabs.add_child(TitleTabButton.new("GodotMonochrome", tr("Editors"), _tab_container, [_local_editors, _remote_editors]))
@@ -73,14 +73,14 @@ func _ready() -> void:
 	_gui_base.set_anchor(SIDE_RIGHT, Control.ANCHOR_END)
 	_gui_base.set_anchor(SIDE_BOTTOM, Control.ANCHOR_END)
 	_gui_base.set_end(Vector2.ZERO)
-	
+
 	_main_v_box.set_anchors_and_offsets_preset(
-		Control.PRESET_FULL_RECT, 
-		Control.PRESET_MODE_MINSIZE, 
+		Control.PRESET_FULL_RECT,
+		Control.PRESET_MODE_MINSIZE,
 		get_theme_constant("window_border_margin", "Editor")
 	)
 	_main_v_box.add_theme_constant_override(
-		"separation", 
+		"separation",
 		get_theme_constant("top_bar_separation", "Editor")
 	)
 
@@ -122,7 +122,7 @@ func _ready() -> void:
 	_settings_button.pressed.connect(func() -> void:
 		($Settings as SettingsWindow).raise_settings()
 	)
-	
+
 	_local_editors_service.load()
 	_projects_service.load()
 
@@ -135,7 +135,7 @@ func _ready() -> void:
 
 	_setup_godots_releases()
 	_setup_asset_lib_projects()
-	
+
 	Context.add(self, %CommandViewer)
 
 
@@ -162,7 +162,7 @@ func _enter_tree() -> void:
 		var screen_rect := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
 		
 		window_size *= scale_factor
-		
+
 		DisplayServer.window_set_size(window_size)
 		if screen_rect.size != Vector2i():
 			var window_position := Vector2i(
@@ -180,13 +180,13 @@ func _enter_tree() -> void:
 		if DisplayServer.get_screen_from_rect(rect) != -1:
 			window.size = rect.size
 			window.position = rect.position
-	
+
 	_local_remote_switch_context = LocalRemoteEditorsSwitchContext.new(
 		_local_editors,
 		_remote_editors,
 		_tab_container
 	)
-	
+
 	_local_editors_service = LocalEditors.List.new(
 		Config.EDITORS_CONFIG_PATH
 	)
@@ -195,7 +195,7 @@ func _enter_tree() -> void:
 		_local_editors_service,
 		preload("res://assets/default_project_icon.svg")
 	)
-	
+
 	Context.add(self, _local_remote_switch_context)
 	Context.add(self, _local_editors_service)
 	Context.add(self, _projects_service)
@@ -203,7 +203,7 @@ func _enter_tree() -> void:
 	_on_exit_tree_callbacks.append(func() -> void:
 		_local_editors_service.cleanup()
 		_projects_service.cleanup()
-		
+
 		Context.erase(self, _local_editors_service)
 		Context.erase(self, _projects_service)
 		Context.erase(self, _local_remote_switch_context)
@@ -267,7 +267,7 @@ func _setup_asset_lib_projects() -> void:
 			)
 		)
 	)
-	
+
 	_asset_lib_projects.init(
 		asset_lib_factory,
 		category_src,
@@ -340,7 +340,7 @@ class TitleTabButton extends Button:
 			add_theme_font_override("font", get_theme_font("main_button_font", "EditorFonts"))
 			add_theme_font_size_override("font_size", get_theme_font_size("main_button_font_size", "EditorFonts"))
 		)
-	
+
 	func _notification(what: int) -> void:
 		if what == NOTIFICATION_THEME_CHANGED:
 			if _icon_name:

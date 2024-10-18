@@ -6,8 +6,10 @@ signal removed
 signal manage_tags_requested
 signal duplicate_requested
 signal tag_clicked(tag: String)
+signal relocate_requested(new_path: String)
 
 @export var _rename_dialog_scene: PackedScene
+@export var _edit_hierarchy_dialog_scene: PackedScene
 
 @onready var _path_label: Label = %PathLabel
 @onready var _title_label: Label = %TitleLabel
@@ -56,7 +58,7 @@ func init(item: Projects.Item) -> void:
 	item.loaded.connect(func() -> void:
 		_fill_data(item)
 	)
-	
+
 	_editor_button.pressed.connect(_on_rebind_editor.bind(item))
 	_editor_button.disabled = item.is_missing
 	
@@ -74,7 +76,7 @@ func init(item: Projects.Item) -> void:
 	double_clicked.connect(func() -> void:
 		if item.is_missing:
 			return
-		
+
 		if item.has_invalid_editor:
 			_on_rebind_editor(item)
 		else:
@@ -200,17 +202,32 @@ func _fill_actions(item: Projects.Item) -> void:
 		"icon": Action.IconTheme.new(self, "Filesystem", "EditorIcons"),
 		"act": _show_in_file_manager.bind(item),
 		"label": tr("Show in File Manager"),
+
+	var edit_hierarchy := Action.from_dict({
+		"key": "hierarchy",
+		"icon": Action.IconTheme.new(self, "TreeMonochrome", "EditorIcons"),
+		"act": _on_edit_hierarchy.bind(item),
+		"label": tr("Hierarchy")
+	})
+
+	var relocate = Action.from_dict({
+		"key": "relocate",
+		"icon": Action.IconTheme.new(self, "Folder", "EditorIcons"),
+		"act": func(): relocate_requested.emit(),
+		"label": tr("Relocate")
 	})
 
 	_actions = Action.List.new([
 		edit,
 		run,
+		edit_hierarchy,
 		duplicate,
 		rename,
 		bind_editor,
 		manage_tags,
 		view_command,
 		show_in_file_manager,
+		relocate,
 		remove
 	])
 
@@ -219,7 +236,7 @@ func _fill_data(item: Projects.Item) -> void:
 	if item.is_missing:
 		_explore_button.icon = get_theme_icon("FileBroken", "EditorIcons")
 		modulate = Color(1, 1, 1, 0.498)
-		
+
 	_project_warning.visible = item.has_invalid_editor
 	_favorite_button.button_pressed = item.favorite
 	_title_label.text = item.name
@@ -229,13 +246,14 @@ func _fill_data(item: Projects.Item) -> void:
 	_tag_container.set_tags(item.tags)
 	_set_features(item.features)
 	_tags = item.tags
-	
+
 	_sort_data.favorite = item.favorite
 	_sort_data.name = item.name
 	_sort_data.path = item.path
 	_sort_data.last_modified = item.last_modified
 	_sort_data.tag_sort_string = "".join(item.tags)
-	
+	_sort_data.hierarchy = item.hierarchy
+
 	for action in _actions.sub_list([
 		'duplicate',
 		'bind-editor',
@@ -243,7 +261,7 @@ func _fill_data(item: Projects.Item) -> void:
 		'rename'
 	]).all():
 		action.disable(item.is_missing)
-	
+
 	for action in _actions.sub_list([
 		'view-command',
 		'edit',
@@ -311,7 +329,7 @@ func _on_rebind_editor(item: Projects.Item) -> void:
 	
 	var options := OptionButton.new()
 	hbox.add_child(options)
-	
+
 	if item.has_version_hint:
 		var hbox2 := HBoxContainer.new()
 		hbox2.modulate = Color(0.5, 0.5, 0.5, 0.5)
@@ -325,9 +343,9 @@ func _on_rebind_editor(item: Projects.Item) -> void:
 		var version_hint_value := Label.new()
 		version_hint_value.text = item.version_hint
 		hbox2.add_child(version_hint_value)
-	
+
 	vbox.add_spacer(false)
-	
+
 	title.text = "%s: " % tr("Editor")
 	
 	options.item_selected.connect(func(idx: int) -> void:
@@ -346,10 +364,20 @@ func _on_rebind_editor(item: Projects.Item) -> void:
 		item.editor_path = new_editor_path
 		edited.emit()
 	)
-	
+
 	add_child(bind_dialog)
 	bind_dialog.popup_centered()
 
+func _on_edit_hierarchy(item):
+	var dialog = _edit_hierarchy_dialog_scene.instantiate()
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.init(item.hierarchy)
+	dialog.title = "Set Hierarchy..."
+	dialog.rename_done.connect(func(new_name):
+		item.hierarchy = new_name
+		edited.emit()
+	)
 
 func _on_rename(item: Projects.Item) -> void:
 	var dialog: RenameEditorDialog = _rename_dialog_scene.instantiate()
@@ -391,7 +419,7 @@ func _on_run_with_editor(item: Projects.Item, editor_flag: Callable, action_name
 	vb.add_child(editor_name)
 	vb.add_child(checkbox)
 	vb.add_spacer(false)
-	
+
 	confirmation_dialog.add_child(vb)
 	
 	confirmation_dialog.confirmed.connect(func() -> void:
@@ -442,6 +470,10 @@ func apply_filter(filter: Callable) -> bool:
 
 func get_sort_data() -> Dictionary:
 	return _sort_data
+
+
+func get_section():
+	return _sort_data.hierarchy
 
 
 class RunButton extends Button:

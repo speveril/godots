@@ -1,4 +1,4 @@
-class_name ConfigFileValue 
+class_name ConfigFileValue
 extends RefCounted
 
 var _cfg: IConfigFileLike

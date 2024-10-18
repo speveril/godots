@@ -16,14 +16,14 @@ class List:
 	
 	func _init(items: Array[Self]) -> void:
 		_items = items
-	
+
 	func by_key(key: String) -> Self:
 		for item in _items:
 			if item.key == key:
 				return item
 		assert(false, "Item was not found")
 		return null
-	
+
 	func sub_list(keys: PackedStringArray) -> List:
 		var items: Array[Self]
 		for item in _items:
@@ -38,18 +38,18 @@ class List:
 				continue
 			items.append(item)
 		return List.new(items)
-	
+
 	func all() -> Array[Self]:
 		return _items
 
 
 class Self:
 	signal disabled(val: bool)
-	
+
 	var key: String:
 		get: return _key
 		set(_v): utils.prop_is_readonly()
-	
+
 	var label: String:
 		get: return _label
 		set(_v): utils.prop_is_readonly()
@@ -61,7 +61,7 @@ class Self:
 	var icon: Icon:
 		get: return _icon
 		set(_v): utils.prop_is_readonly()
-	
+
 	var _key: String
 	var _label: String
 	var _icon: Icon
@@ -86,7 +86,7 @@ class Self:
 	
 	func is_disabled() -> bool:
 		return _is_disabled
-	
+
 	func to_btn() -> ButtonControl:
 		return ButtonControl.new(self)
 
@@ -105,7 +105,7 @@ class IconTheme extends Icon:
 		_control = control
 		_name = name
 		_theme_type = theme_type
-	
+
 	func texture() -> Texture2D:
 		return _control.get_theme_icon(_name, _theme_type)
 

@@ -3,7 +3,7 @@ class_name ProjectItemActions
 
 class Settings:
 	signal changed
-	
+
 	var _visible_keys: ConfigFileValue
 	var _show_tags: ConfigFileValue
 	var _show_features: ConfigFileValue
@@ -14,8 +14,8 @@ class Settings:
 	
 	func _init(cache_section: String, default_visible_keys: Array[String]) -> void:
 		_visible_keys = Cache.smart_value(cache_section, 'visible-keys', true)
-		_show_tags = Cache.smart_value(cache_section, 'show-tags', true) 
-		_show_features = Cache.smart_value(cache_section, 'show-features', true) 
+		_show_tags = Cache.smart_value(cache_section, 'show-tags', true)
+		_show_features = Cache.smart_value(cache_section, 'show-features', true)
 		_is_flat = Cache.smart_value(cache_section, 'is-flat', true)
 		_show_text = Cache.smart_value(cache_section, 'show-text', true)
 		_show_always = Cache.smart_value(cache_section, 'show-always', true)
@@ -43,7 +43,7 @@ class Settings:
 	func set_flat(value: bool) -> void:
 		_is_flat.put(value)
 		changed.emit()
-	
+
 	func is_show_text() -> bool:
 		return _show_text.ret(true)
 
@@ -108,7 +108,7 @@ class Menu extends MenuButton:
 				popup.get_item_index(id)
 			) as Dictionary).get('on_pressed', utils.empty_func) as Callable).call()
 		)
-		
+
 		_settings_popup = PopupMenu.new()
 		_settings_popup.name = "Settings"
 		_settings_popup.hide_on_checkable_item_selection = false
@@ -190,11 +190,11 @@ class Menu extends MenuButton:
 		func _init(actions: Array[Action.Self], settings: Settings) -> void:
 			for action in actions:
 				add(action, settings)
-		
+
 		func add(action: Action.Self, settings: Settings) -> View:
 			var view := View.new(action, settings)
 			_items.append(view)
 			return view
-		
+
 		func all() -> Array[View]:
 			return _items

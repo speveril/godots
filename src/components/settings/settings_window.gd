@@ -60,7 +60,7 @@ func _prepare_settings() -> Array:
 			SettingCheckbox,
 			tr("Restore last window size and position on startup.")
 		)),
-		
+
 		SettingRestartRequired(SettingChangeObserved(SettingCfg(
 			"application/theme/preset",
 			ConfigFileValue.new(
@@ -182,7 +182,7 @@ func _ready() -> void:
 			Config.save()
 	)
 
-	var title_text := tr("Settings") 
+	var title_text := tr("Settings")
 	var set_title_text := func(pattern: String) -> void:
 		title = pattern % title_text
 	title = title_text
@@ -192,19 +192,19 @@ func _ready() -> void:
 	Config.saved.connect(func() -> void:
 		set_title_text.call("%s")
 	)
-	
+
 	get_ok_button().text = tr("Save & Close")
-	
-	
+
+
 	var left_vb := %LeftVB as VBoxContainer
 	left_vb.custom_minimum_size = Vector2(190, 0) * Config.EDSCALE
-	
-	
+
+
 	var right_vb: = %RightVB as VBoxContainer
 	right_vb.custom_minimum_size = Vector2(300, 0) * Config.EDSCALE
 	right_vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	
-	
+
+
 	(%RestartInfoLabel as Label).text = tr("Godots must be restarted for changes to take effect.")
 	(%RestartButton as Button).pressed.connect(func() -> void:
 		Config.save()
@@ -218,12 +218,12 @@ func _ready() -> void:
 		(%RestartContainer as PanelContainer).hide()
 	)
 	(%RestartContainer as Control).hide()
-	
+
 	(%OpenConfigFileButton as Button).pressed.connect(func() -> void:
 		var config_path := ProjectSettings.globalize_path(Config.APP_CONFIG_PATH.get_base_dir())
 		OS.shell_show_in_file_manager(config_path)
 	)
-	
+
 	_setup_settings()
 
 
@@ -236,12 +236,12 @@ func raise_settings() -> void:
 
 func _setup_settings() -> void:
 	var settings := _prepare_settings().filter(func(x: Variant) -> bool: return x != null)
-	
+
 	for setting: Setting in settings:
 		setting.bind_settings_window(self)
 		setting.validate()
 		setting.add_control(SettingControlTarget.new(%InspectorVBox, setting.category.raw))
-	
+
 	var tree := %SectionsTree as Tree
 	tree.item_selected.connect(func() -> void:
 		var selected := tree.get_selected()
@@ -258,7 +258,7 @@ func _setup_settings() -> void:
 		if not category.first_lvl in categories:
 			categories[category.first_lvl] = Set.new()
 		var second_lvls := categories[category.first_lvl] as Set
-		second_lvls.append(category.second_lvl) 
+		second_lvls.append(category.second_lvl)
 	var selected := false
 	for first_lvl: String in categories.keys():
 		var first_lvl_item := tree.create_item(root)
@@ -285,7 +285,7 @@ func SettingCfg(category: String, cfg_value: ConfigFileValue, prop_factory: Vari
 		prop_factory = func(a1: Variant, a2: Variant, a3: Variant, a4: Variant) -> Setting: 
 			return (prop_factory as Script).call("new", a1, a2, a3, a4)
 	return ((prop_factory as Callable).call(
-		category, 
+		category,
 		cfg_value.ret(),
 		tooltip,
 		cfg_value.get_baked_default()
@@ -317,25 +317,25 @@ func SettingCustomPresetTrigger(origin: Setting) -> Setting:
 
 class Category:
 	var _category: String
-	
+
 	var name: String:
 		get: return _category.get_file().capitalize()
-	
+
 	var first_lvl: String:
 		get: return _category.split("/")[0]
-	
+
 	var second_lvl: String:
 		get: return _category.split("/")[1]
-	
+
 	var raw: String:
 		get: return _category
-	
+
 	func _init(category: String) -> void:
 		_category = category
 	
 	func validate() -> void:
 		assert(
-			len(_category.split("/")) == 3, 
+			len(_category.split("/")) == 3,
 			"Invalid category %s! Category format is: s/s/s" % _category
 		)
 
@@ -626,7 +626,7 @@ class SettingOptionButton extends Setting:
 					this.selected = item_idx
 					item_to_select_was_found = true
 				item_idx += 1
-			
+
 			if not item_to_select_was_found:
 				this.add_item(_fallback_option)
 				this.selected = item_idx
