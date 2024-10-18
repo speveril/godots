@@ -21,10 +21,10 @@ func _ready() -> void:
 	_scan_dialog.dir_to_scan_selected.connect(func(dir_to_scan: String):
 		_scan_editors(dir_to_scan)
 	)
-	
+
 	var remove_missing_popup = RemoveMissingDialog.new(_remove_missing)
 	add_child(remove_missing_popup)
-	
+
 	var actions := Action.List.new([
 		Action.from_dict({
 			"key": "import",
@@ -72,7 +72,7 @@ func _ready() -> void:
 			"act": func(): remove_missing_popup.popup_centered()
 		}),
 	])
-	
+
 	_remove_missing_action = actions.by_key("remove-missing")
 
 	var editor_actions = TabActions.Menu.new(
@@ -80,9 +80,9 @@ func _ready() -> void:
 			'import',
 			'download',
 			'scan',
-		]).all(), 
+		]).all(),
 		TabActions.Settings.new(
-			Cache.section_of(self), 
+			Cache.section_of(self),
 			[
 				'import',
 				'download',
@@ -92,7 +92,7 @@ func _ready() -> void:
 	)
 	editor_actions.add_controls_to_node(%EditorsList/HBoxContainer/TabActions)
 	editor_actions.icon = get_theme_icon("GuiTabMenuHl", "EditorIcons")
-	
+
 	%EditorsList/HBoxContainer.add_child(_remove_missing_action.to_btn().make_flat(true).show_text(false))
 	%EditorsList/HBoxContainer.add_child(actions.by_key('orphan').to_btn().make_flat(true).show_text(false))
 	%EditorsList/HBoxContainer.add_child(actions.by_key('refresh').to_btn().make_flat(true).show_text(false))
@@ -103,7 +103,7 @@ func init(editors: LocalEditors.List):
 	_local_editors = editors
 	_editors_list.refresh(_local_editors.all())
 	_editors_list.sort_items()
-	
+
 	_orphan_editors_explorer.init(editors, Config.VERSIONS_PATH.ret())
 	_update_remove_missing_disabled()
 
@@ -116,7 +116,7 @@ func add(editor_name, exec_path):
 
 
 func import(editor_name="", editor_path=""):
-	if %EditorImport.visible: 
+	if %EditorImport.visible:
 		return
 	%EditorImport.init(editor_name, editor_path)
 	%EditorImport.popup_centered()
@@ -167,10 +167,10 @@ func _scan_editors(dir_to_scan: String):
 			return evidences.all(func(is_true): return is_true)
 
 	var editors_exec = edir.list_recursive(
-		ProjectSettings.globalize_path(dir_to_scan), 
+		ProjectSettings.globalize_path(dir_to_scan),
 		false,
 		filter,
-		(func(x: String): 
+		(func(x: String):
 			return not x.get_file().begins_with("."))
 	)
 	for editor_exec in editors_exec:

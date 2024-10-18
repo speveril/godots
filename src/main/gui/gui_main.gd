@@ -52,14 +52,14 @@ func _ready():
 			else:
 				zip_reader.close()
 				_remote_editors.install_zip(
-					file, 
-					file.get_file().replace(".zip", ""), 
+					file,
+					file.get_file().replace(".zip", ""),
 					utils.guess_editor_name(file.replace(".zip", ""))
 				)
 		else:
 			_local_editors.import(utils.guess_editor_name(file), file)
 	)
-	
+
 	_title_tabs.add_child(TitleTabButton.new("ProjectList", tr("Projects"), _tab_container, [_projects]))
 	_title_tabs.add_child(TitleTabButton.new("AssetLib", tr("Asset Library"), _tab_container, [_asset_lib_projects]))
 	_title_tabs.add_child(TitleTabButton.new("GodotMonochrome", tr("Editors"), _tab_container, [_local_editors, _remote_editors]))
@@ -73,14 +73,14 @@ func _ready():
 	_gui_base.set_anchor(SIDE_RIGHT, Control.ANCHOR_END)
 	_gui_base.set_anchor(SIDE_BOTTOM, Control.ANCHOR_END)
 	_gui_base.set_end(Vector2.ZERO)
-	
+
 	_main_v_box.set_anchors_and_offsets_preset(
-		Control.PRESET_FULL_RECT, 
-		Control.PRESET_MODE_MINSIZE, 
+		Control.PRESET_FULL_RECT,
+		Control.PRESET_MODE_MINSIZE,
 		get_theme_constant("window_border_margin", "Editor")
 	)
 	_main_v_box.add_theme_constant_override(
-		"separation", 
+		"separation",
 		get_theme_constant("top_bar_separation", "Editor")
 	)
 
@@ -105,11 +105,11 @@ func _ready():
 		_tab_container.current_tab = _tab_container.get_tab_idx_from_control(_updates)
 	)
 	_version_button.tooltip_text = tr("Click to see other versions.")
-	
+
 	%NewsButton.self_modulate = Color(1, 1, 1, 0.6)
 	%NewsButton.underline = LinkButton.UNDERLINE_MODE_ON_HOVER
 	%NewsButton.tooltip_text = tr("Click to see the post.")
-	
+
 	_settings_button.flat = true
 	#_settings_button.text = tr("Settings")
 	_settings_button.text = ""
@@ -121,7 +121,7 @@ func _ready():
 	_settings_button.pressed.connect(func():
 		$Settings.raise_settings()
 	)
-	
+
 	_local_editors_service.load()
 	_projects_service.load()
 
@@ -134,7 +134,7 @@ func _ready():
 
 	_setup_godots_releases()
 	_setup_asset_lib_projects()
-	
+
 	Context.add(self, %CommandViewer)
 
 
@@ -150,17 +150,17 @@ func _notification(what: int) -> void:
 func _enter_tree():
 	theme_source.set_scale(Config.EDSCALE)
 	theme = theme_source.create_custom_theme(null)
-	
+
 	var window = get_window()
 	window.min_size = Vector2(520, 370) * Config.EDSCALE
-	
+
 	var scale_factor = max(1, Config.EDSCALE * 0.75)
 	if scale_factor > 1:
 		var window_size = DisplayServer.window_get_size()
 		var screen_rect = DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
-		
+
 		window_size *= scale_factor
-		
+
 		DisplayServer.window_set_size(window_size)
 		if screen_rect.size != Vector2i():
 			var window_position = Vector2i(
@@ -178,13 +178,13 @@ func _enter_tree():
 		if DisplayServer.get_screen_from_rect(rect) != -1:
 			window.size = rect.size
 			window.position = rect.position
-	
+
 	_local_remote_switch_context = LocalRemoteEditorsSwitchContext.new(
 		_local_editors,
 		_remote_editors,
 		_tab_container
 	)
-	
+
 	_local_editors_service = LocalEditors.List.new(
 		Config.EDITORS_CONFIG_PATH
 	)
@@ -193,15 +193,15 @@ func _enter_tree():
 		_local_editors_service,
 		preload("res://assets/default_project_icon.svg")
 	)
-	
+
 	Context.add(self, _local_remote_switch_context)
 	Context.add(self, _local_editors_service)
 	Context.add(self, _projects_service)
-	
+
 	_on_exit_tree_callbacks.append(func():
 		_local_editors_service.cleanup()
 		_projects_service.cleanup()
-		
+
 		Context.erase(self, _local_editors_service)
 		Context.erase(self, _projects_service)
 		Context.erase(self, _local_remote_switch_context)
@@ -225,21 +225,21 @@ func _setup_asset_lib_projects():
 		RemoteEditorsTreeDataSourceGithub.YmlSourceGithub.new()
 	)
 #	var version_src = GodotVersionOptionButton.SrcMock.new(["4.1"])
-	
+
 	var request = HTTPRequest.new()
 	add_child(request)
 	var asset_lib_factory = AssetLib.FactoryDefault.new(request)
-	
+
 	var category_src = AssetCategoryOptionButton.SrcRemote.new()
-	
+
 	_asset_lib_projects.download_requested.connect(func(item: AssetLib.Item, icon):
 		var asset_download = _asset_download.instantiate() as AssetDownload
 		%DownloadsContainer.add_download_item(asset_download)
 		if icon != null:
 			asset_download.icon.texture = icon
 		asset_download.start(
-			item.download_url, 
-			Config.DOWNLOADS_PATH.ret() + "/", 
+			item.download_url,
+			Config.DOWNLOADS_PATH.ret() + "/",
 			"project.zip",
 			item.title
 		)
@@ -263,7 +263,7 @@ func _setup_asset_lib_projects():
 			)
 		)
 	)
-	
+
 	_asset_lib_projects.init(
 		asset_lib_factory,
 		category_src,
@@ -293,8 +293,8 @@ func _setup_godots_releases():
 	_auto_updates.init(
 		GodotsRecentReleases.Cached.new(
 			GodotsRecentReleases.Default.new(godots_releases)
-		), 
-		func(): 
+		),
+		func():
 			_tab_container.current_tab = _tab_container.get_tab_idx_from_control(_godots_releases)
 	)
 	_godots_releases.init(
@@ -306,7 +306,7 @@ func _setup_godots_releases():
 
 class TitleTabButton extends Button:
 	var _icon_name
-	
+
 	func _init(icon, text, tab_container: TabContainer, tab_controls: Array) -> void:
 		_icon_name = icon
 		self.text = text
@@ -319,24 +319,24 @@ class TitleTabButton extends Button:
 		)
 		tab_container.tab_changed.connect(func(idx):
 			set_pressed_no_signal(
-				tab_controls.any(func(tab_control): 
+				tab_controls.any(func(tab_control):
 					return tab_container.get_tab_idx_from_control(tab_control) == idx\
 				)
 			)
 		)
 		toggle_mode = true
 		focus_mode = Control.FOCUS_NONE
-		
+
 		self.ready.connect(func():
 			set_pressed_no_signal(
-				tab_controls.any(func(tab_control): 
+				tab_controls.any(func(tab_control):
 					return tab_container.get_tab_idx_from_control(tab_control) == tab_container.current_tab\
 				)
 			)
 			add_theme_font_override("font", get_theme_font("main_button_font", "EditorFonts"))
 			add_theme_font_size_override("font_size", get_theme_font_size("main_button_font_size", "EditorFonts"))
 		)
-	
+
 	func _notification(what: int) -> void:
 		if what == NOTIFICATION_THEME_CHANGED:
 			if _icon_name:

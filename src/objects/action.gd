@@ -13,24 +13,24 @@ static func from_dict(dict: Dictionary) -> Self:
 
 class List:
 	var _items: Array[Self]
-	
+
 	func _init(items: Array[Self]):
 		_items = items
-	
+
 	func by_key(key: String) -> Self:
 		for item in _items:
 			if item.key == key:
 				return item
 		assert(false, "Item was not found")
 		return null
-	
+
 	func sub_list(keys: PackedStringArray) -> List:
 		var items: Array[Self]
 		for item in _items:
 			if keys.has(item.key):
 				items.append(item)
 		return List.new(items)
-	
+
 	func without(keys: PackedStringArray):
 		var items: Array[Self]
 		for item in _items:
@@ -38,18 +38,18 @@ class List:
 				continue
 			items.append(item)
 		return List.new(items)
-	
+
 	func all() -> Array[Self]:
 		return _items
 
 
 class Self:
 	signal disabled(val: bool)
-	
+
 	var key: String:
 		get: return _key
 		set(_v): utils.prop_is_readonly()
-	
+
 	var label: String:
 		get: return _label
 		set(_v): utils.prop_is_readonly()
@@ -61,32 +61,32 @@ class Self:
 	var icon: Icon:
 		get: return _icon
 		set(_v): utils.prop_is_readonly()
-	
+
 	var _key: String
 	var _label: String
 	var _icon: Icon
 	var _tooltip: String
 	var _act: Callable
 	var _is_disabled: bool = false
-	
+
 	func _init(key: String, label: String, icon: Icon, act: Callable, tooltip: String):
 		_key = key
 		_label = label
 		_icon = icon
 		_act = act
 		_tooltip = tooltip
-	
+
 	func act():
 		assert(not _is_disabled, "Unable to run the disabled action")
 		_act.call()
-	
+
 	func disable(val: bool):
 		_is_disabled = val
 		disabled.emit(val)
-	
+
 	func is_disabled():
 		return _is_disabled
-	
+
 	func to_btn() -> ButtonControl:
 		return ButtonControl.new(self)
 
@@ -100,19 +100,19 @@ class IconTheme extends Icon:
 	var _control: Control
 	var _name: StringName
 	var _theme_type: StringName
-	
+
 	func _init(control: Control, name: StringName, theme_type: StringName):
 		_control = control
 		_name = name
 		_theme_type = theme_type
-	
+
 	func texture() -> Texture2D:
 		return _control.get_theme_icon(_name, _theme_type)
 
 
 class ButtonControl extends Button:
 	var _action: Action.Self
-	
+
 	func _init(action: Action.Self):
 		_action = action
 		if action.tooltip.is_empty():
@@ -122,7 +122,7 @@ class ButtonControl extends Button:
 		text = _action.label
 		pressed.connect(_action.act)
 		action.disabled.connect(func(v): disabled = v)
-	
+
 	func _notification(what):
 		if NOTIFICATION_THEME_CHANGED == what:
 			icon = _action.icon.texture()
@@ -137,11 +137,11 @@ class ButtonControl extends Button:
 			icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			size_flags_horizontal = Control.SIZE_FILL
 		return self
-	
+
 	func make_flat(val) -> ButtonControl:
 		flat = val
 		return self
-	
+
 	func horizontal_flags(flags) -> ButtonControl:
 		size_flags_horizontal = flags
 		return self

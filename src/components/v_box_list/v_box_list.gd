@@ -53,7 +53,7 @@ func add(item_data):
 	)
 	if item_control.has_signal("tag_clicked"):
 		item_control.tag_clicked.connect(
-			func(tag): 
+			func(tag):
 				set_search_box_text("tag:%s" % tag)
 				_search_box.grab_focus()
 		)
@@ -110,7 +110,7 @@ func _update_filters():
 
 	for item in _items_container.get_children():
 		if item.has_method("apply_filter"):
-			var should_be_visible = item.apply_filter(func(data): 
+			var should_be_visible = item.apply_filter(func(data):
 				var search_path = data['path']
 				if not search_term.contains('/'):
 					search_path = search_path.get_file()

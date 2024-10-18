@@ -40,17 +40,17 @@ func _prepare_settings():
 			SettingCheckbox,
 			tr("Restore last window size and position on startup.")
 		)),
-		
+
 		SettingRestartRequired(SettingChangeObserved(SettingCfg(
 			"application/theme/preset",
 			ConfigFileValue.new(
-				Config._cfg, 
+				Config._cfg,
 				"theme",
 				"interface/theme/preset"
 			).bake_default("Default"),
 			SettingThemePreset,
 		))),
-		
+
 		SettingRestartRequired(SettingChangeObserved(SettingCfg(
 			"application/advanced/downloads_path",
 			Config.DOWNLOADS_PATH,
@@ -96,9 +96,9 @@ func _init():
 		%WarningRect.icon = get_theme_icon("StatusWarning", "EditorIcons")
 		%WarningRect.self_modulate = get_theme_color("warning_color", "Editor") * Color(1, 1, 1, 0.6)
 		%RestartInfoLabel.self_modulate = get_theme_color("warning_color", "Editor") * Color(1, 1, 1, 0.6)
-		
+
 		%OpenConfigFileButton.icon = get_theme_icon("Load", "EditorIcons")
-		
+
 		var sections_root = (%SectionsTree as Tree).get_root()
 		if sections_root:
 			for child in sections_root.get_children():
@@ -113,7 +113,7 @@ func _ready():
 			Config.save()
 	)
 
-	var title_text = tr("Settings") 
+	var title_text = tr("Settings")
 	var set_title_text = func(pattern):
 		title = pattern % title_text
 	title = title_text
@@ -123,19 +123,19 @@ func _ready():
 	Config.saved.connect(func():
 		set_title_text.call("%s")
 	)
-	
+
 	get_ok_button().text = tr("Save & Close")
-	
-	
+
+
 	var left_vb = %LeftVB
 	left_vb.custom_minimum_size = Vector2(190, 0) * Config.EDSCALE
-	
-	
+
+
 	var right_vb: = %RightVB
 	right_vb.custom_minimum_size = Vector2(300, 0) * Config.EDSCALE
 	right_vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	
-	
+
+
 	%RestartInfoLabel.text = tr("Godots must be restarted for changes to take effect.")
 	%RestartButton.pressed.connect(func():
 		Config.save()
@@ -149,12 +149,12 @@ func _ready():
 		%RestartContainer.hide()
 	)
 	%RestartContainer.hide()
-	
+
 	%OpenConfigFileButton.pressed.connect(func():
 		var config_path = ProjectSettings.globalize_path(Config.APP_CONFIG_PATH.get_base_dir())
 		OS.shell_show_in_file_manager(config_path)
 	)
-	
+
 	_setup_settings()
 
 
@@ -167,11 +167,11 @@ func raise_settings():
 
 func _setup_settings():
 	var settings = _prepare_settings().filter(func(x): return x != null)
-	
+
 	for setting in settings:
 		setting.validate()
 		setting.add_control(SettingControlTarget.new(%InspectorVBox, setting.category.raw))
-	
+
 	var tree = %SectionsTree as Tree
 	tree.item_selected.connect(func():
 		var selected = tree.get_selected()
@@ -188,7 +188,7 @@ func _setup_settings():
 		if not category.first_lvl in categories:
 			categories[category.first_lvl] = Set.new()
 		var second_lvls = categories[category.first_lvl]
-		second_lvls.append(category.second_lvl) 
+		second_lvls.append(category.second_lvl)
 	var selected = false
 	for first_lvl in categories.keys():
 		var first_lvl_item = tree.create_item(root)
@@ -214,7 +214,7 @@ func SettingCfg(category, cfg_value, prop_factory, tooltip=""):
 	if prop_factory is Script:
 		prop_factory = func(a1, a2, a3, a4): return prop_factory.new(a1, a2, a3, a4)
 	return prop_factory.call(
-		category, 
+		category,
 		cfg_value.ret(),
 		tooltip,
 		cfg_value.get_baked_default()
@@ -238,25 +238,25 @@ func SettingRestartRequired(origin: Setting):
 
 class Category:
 	var _category: String
-	
+
 	var name:
 		get: return _category.get_file().capitalize()
-	
+
 	var first_lvl:
 		get: return _category.split("/")[0]
-	
+
 	var second_lvl:
 		get: return _category.split("/")[1]
-	
+
 	var raw:
 		get: return _category
-	
+
 	func _init(category):
 		_category = category
-	
+
 	func validate():
 		assert(
-			len(_category.split("/")) == 3, 
+			len(_category.split("/")) == 3,
 			"Invalid category %s! Category format is: s/s/s" % _category
 		)
 
@@ -264,11 +264,11 @@ class Category:
 class SettingControlTarget:
 	var _target: Node
 	var _category: String
-	
+
 	func _init(target: Node, category: String):
 		_target = target
 		_category = category
-	
+
 	func add_child(child: Node):
 		child.set_meta("category", _category)
 		_target.add_child(child)
@@ -276,41 +276,41 @@ class SettingControlTarget:
 
 class Setting extends RefCounted:
 	signal changed(new_value)
-	
+
 	var category: Category
 	var _value
 	var _tooltip
 	var _default_value
-	
+
 	func _init(name: String, value, tooltip, default_value):
 		self.category = Category.new(name)
 		self._value = value
 		self._tooltip = tooltip
 		self._default_value = default_value
-	
+
 	func add_control(target):
 		pass
-	
+
 	func on_value_changed(callback):
 		changed.connect(callback)
 		return self
-	
+
 	func notify_changed():
 		changed.emit(_value)
-	
+
 	func set_value(value):
 		_value = value
-	
+
 	func set_value_and_notify(value):
 		set_value(value)
 		notify_changed()
-	
+
 	func validate():
 		category.validate()
-	
+
 	func reset():
 		set_value_and_notify(_default_value)
-	
+
 	func value_is_not_default():
 		return _value != _default_value
 
@@ -349,7 +349,7 @@ class SettingFilePath extends Setting:
 	func add_control(target):
 		var file_dialog = CompRefs.Simple.new()
 		var line_edit = CompRefs.Simple.new()
-		var update_value = func(new_value): 
+		var update_value = func(new_value):
 				set_value_and_notify(new_value)
 				line_edit.value.text = new_value
 		self.on_value_changed(func(new_value):
@@ -378,8 +378,8 @@ class SettingFilePath extends Setting:
 						CompInit.TREE_ENTERED(
 							CompInit.SET_THEME_ICON("Load", "EditorIcons")
 						),
-						CompInit.PRESSED(func(_a): 
-							var dialog = file_dialog.value as FileDialog 
+						CompInit.PRESSED(func(_a):
+							var dialog = file_dialog.value as FileDialog
 							dialog.current_dir = self._value
 							dialog.popup_centered_ratio(0.5)\
 						)
@@ -483,12 +483,12 @@ class CompSettingPanelContainer extends Comp:
 class SettingOptionButton extends Setting:
 	var _options: Dictionary
 	var _fallback_option: String
-	
+
 	func _init(n, v, t, d, options, fallback_option):
 		super._init(n, v, t, d)
 		self._options = options
 		self._fallback_option = fallback_option
-	
+
 	func add_control(target):
 		var update_selected_value = func(this: OptionButton):
 			this.clear()
@@ -500,11 +500,11 @@ class SettingOptionButton extends Setting:
 					this.selected = item_idx
 					item_to_select_was_found = true
 				item_idx += 1
-			
+
 			if not item_to_select_was_found:
 				this.add_item(_fallback_option)
 				this.selected = item_idx
-		
+
 		var control = Comp.new(HBoxContainer, [
 			CompSettingNameContainer.new(self),
 			CompSettingPanelContainer.new(_tooltip, [

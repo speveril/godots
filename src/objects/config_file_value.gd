@@ -1,4 +1,4 @@
-class_name ConfigFileValue 
+class_name ConfigFileValue
 extends RefCounted
 
 var _cfg
@@ -21,7 +21,7 @@ func exists():
 
 func ret(default=null):
 	default = _baked_default if default == null else default
-	var value = _cfg.get_value(_section, _key, default) 
+	var value = _cfg.get_value(_section, _key, default)
 	if _map_return_value:
 		value = _map_return_value.call(value)
 	return value

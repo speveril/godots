@@ -1,4 +1,4 @@
-class_name ConfigFileSaveOnSet 
+class_name ConfigFileSaveOnSet
 extends RefCounted
 
 var _origin: ConfigFile

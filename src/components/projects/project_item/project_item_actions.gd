@@ -3,7 +3,7 @@ class_name ProjectItemActions
 
 class Settings:
 	signal changed
-	
+
 	var _visible_keys: ConfigFileValue
 	var _show_tags: ConfigFileValue
 	var _show_features: ConfigFileValue
@@ -11,16 +11,16 @@ class Settings:
 	var _show_text: ConfigFileValue
 	var _show_always: ConfigFileValue
 	var _default_visible_keys: Array[String]
-	
+
 	func _init(cache_section: String, default_visible_keys: Array[String]):
 		_visible_keys = Cache.smart_value(cache_section, 'visible-keys', true)
-		_show_tags = Cache.smart_value(cache_section, 'show-tags', true) 
-		_show_features = Cache.smart_value(cache_section, 'show-features', true) 
+		_show_tags = Cache.smart_value(cache_section, 'show-tags', true)
+		_show_features = Cache.smart_value(cache_section, 'show-features', true)
 		_is_flat = Cache.smart_value(cache_section, 'is-flat', true)
 		_show_text = Cache.smart_value(cache_section, 'show-text', true)
 		_show_always = Cache.smart_value(cache_section, 'show-always', true)
 		_default_visible_keys = default_visible_keys
-	
+
 	func add_to_popup(idx: int, popup: PopupMenu):
 		_add_setting_item(popup, idx, tr("Show Tags"), set_show_tags, is_show_tags)
 		_add_setting_item(popup, idx + 1, tr("Show Features"), set_show_features, is_show_features)
@@ -39,11 +39,11 @@ class Settings:
 
 	func is_flat() -> bool:
 		return _is_flat.ret(false)
-	
+
 	func set_flat(value: bool):
 		_is_flat.put(value)
 		changed.emit()
-	
+
 	func is_show_text() -> bool:
 		return _show_text.ret(true)
 
@@ -67,7 +67,7 @@ class Settings:
 
 	func is_show_always():
 		return _show_always.ret(false)
-	
+
 	func set_show_always(value: bool):
 		_show_always.put(value)
 		changed.emit()
@@ -90,7 +90,7 @@ class Menu extends MenuButton:
 	var _settings: Settings
 	var _settings_popup: PopupMenu
 	var _commands: CustomCommandsPopupItems.Self
-	
+
 	func _init(actions: Array[Action.Self], settings: Settings, commands: CustomCommandsPopupItems.Self):
 		_views = Views.new(actions, settings)
 		_settings = settings
@@ -108,7 +108,7 @@ class Menu extends MenuButton:
 				popup.get_item_index(id)
 			).get('on_pressed', utils.empty_func).call()
 		)
-		
+
 		_settings_popup = PopupMenu.new()
 		_settings_popup.name = "Settings"
 		_settings_popup.hide_on_checkable_item_selection = false
@@ -153,13 +153,13 @@ class Menu extends MenuButton:
 			_control = action.to_btn()
 			#_control.mouse_filter = Control.MOUSE_FILTER_PASS
 			settings.changed.connect(_sync_settings)
-		
+
 		func add_to_popup(idx: int, popup: PopupMenu):
 			popup.add_item(_o.label, idx)
 			popup.set_item_icon(idx, _o.icon.texture())
 			popup.set_item_metadata(idx, {'on_pressed': _o.act})
 			popup.set_item_disabled(idx, _o.is_disabled())
-		
+
 		func add_to_show_section(idx: int, popup: PopupMenu):
 			popup.add_check_item(_o.label, idx)
 			popup.set_item_icon(idx, _o.icon.texture())
@@ -168,17 +168,17 @@ class Menu extends MenuButton:
 				set_visible(popup.is_item_checked(idx))
 			})
 			popup.set_item_checked(idx, is_visible())
-		
+
 		func is_visible():
 			return _settings.is_key_visible(_o.key)
-		
+
 		func set_visible(val):
 			_settings.set_key_visible(_o.key, val)
-		
+
 		func add_to_node(node: Control):
 			node.add_child(_control)
 			_sync_settings()
-		
+
 		func _sync_settings():
 			_control.visible = is_visible()
 			_control.flat = _settings.is_flat()
@@ -186,15 +186,15 @@ class Menu extends MenuButton:
 
 	class Views:
 		var _items: Array[View]
-		
+
 		func _init(actions: Array[Action.Self], settings: Settings):
 			for action in actions:
 				add(action, settings)
-		
+
 		func add(action: Action.Self, settings: Settings) -> View:
 			var view = View.new(action, settings)
 			_items.append(view)
 			return view
-		
+
 		func all() -> Array[View]:
 			return _items
