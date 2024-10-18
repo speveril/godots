@@ -161,6 +161,14 @@ var REMEMBER_WINDOW_SIZE = ConfigFileValue.new(
 ):
 	set(_v): _readonly()
 
+var PROJECT_HIERARCHY = ConfigFileValue.new(
+	_cfg_auto_save,
+	"app",
+	"project_hierarchy",
+	{}
+):
+	set(_v): _readonly()
+
 var CLOSED_SECTIONS = ConfigFileValue.new(
 	_cfg_auto_save,
 	"app",

@@ -98,8 +98,11 @@ class Item:
 		set(value): _external_project_info.name = value
 
 	var hierarchy:
-		set(value): _external_project_info.hierarchy = value
-		get: return _external_project_info.hierarchy
+		set(value):
+			var hierarchy = Config.PROJECT_HIERARCHY.ret()
+			hierarchy[path] = value
+			Config.PROJECT_HIERARCHY.put(hierarchy)
+		get: return Config.PROJECT_HIERARCHY.ret().get(path, "")
 
 	var editor_name:
 		get: return _get_editor_name()
@@ -317,22 +320,6 @@ class ExternalProjectInfo extends RefCounted:
 				)
 				cfg.save(_project_path)
 
-	var hierarchy: String:
-		get: return _hierarchy
-		set(value):
-			if value.strip_edges().is_empty() or is_missing:
-				return
-			_hierarchy = value
-			var cfg = ConfigFile.new()
-			var err = cfg.load(_project_path)
-			if not err:
-				cfg.set_value(
-					"godots",
-					"hierarchy",
-					_hierarchy
-				)
-				cfg.save(_project_path)
-
 	var has_version_hint: bool:
 		get: return _version_hint != null
 
@@ -388,7 +375,6 @@ class ExternalProjectInfo extends RefCounted:
 	var _default_icon
 	var _icon
 	var _name = "Loading..."
-	var _hierarchy = ""
 	var _last_modified
 	var _is_missing = false
 	var _tags = []
@@ -410,7 +396,6 @@ class ExternalProjectInfo extends RefCounted:
 		var err = cfg.load(_project_path)
 
 		_name = cfg.get_value("application", "config/name", "Missing Project")
-		_hierarchy = cfg.get_value("godots", "hierarchy", "")
 		_tags = cfg.get_value("application", "config/tags", [])
 		_features = cfg.get_value("application", "config/features", [])
 		_config_version = cfg.get_value("", "config_version", -1)

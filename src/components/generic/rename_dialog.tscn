@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://src/components/generic/rename_dialog.gd" id="1_mic4o"]
 
 [node name="RenameEditorDialog" type="ConfirmationDialog"]
+title = "Rename"
 position = Vector2i(0, 36)
 size = Vector2i(200, 125)
 visible = true
@@ -23,6 +24,7 @@ text = "Name: "
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+select_all_on_focus = true
 
 [node name="Spacer" type="Control" parent="VBoxContainer"]
 layout_mode = 2

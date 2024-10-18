@@ -156,7 +156,7 @@ func _fill_actions(item: Projects.Item):
 
 	var edit_hierarchy = Action.from_dict({
 		"key": "hierarchy",
-		"icon": Action.IconTheme.new(self, "Script", "EditorIcons"),
+		"icon": Action.IconTheme.new(self, "Folder", "EditorIcons"),
 		"act": _on_edit_hierarchy.bind(item),
 		"label": tr("Hierarchy")
 	})
@@ -357,6 +357,7 @@ func _on_edit_hierarchy(item):
 	add_child(dialog)
 	dialog.popup_centered()
 	dialog.init(item.hierarchy)
+	dialog.title = "Set Hierarchy..."
 	dialog.rename_done.connect(func(new_name):
 		item.hierarchy = new_name
 		edited.emit()

@@ -16,6 +16,7 @@ signal item_duplicate_requested(item_data)
 
 var _sections = {}
 var _all_item_controls = []
+var _current_selection = null
 
 func _ready():
 	_update_theme()
@@ -184,9 +185,9 @@ func _fill_sort_options(btn: OptionButton):
 
 
 func _select_item(item):
-	for child in _items_container.get_children():
-		if child.has_method("deselect"):
-			child.deselect()
+	if _current_selection and is_instance_valid(_current_selection) and _current_selection.has_method("deselect"):
+		_current_selection.deselect()
+	_current_selection = item
 	item.select()
 	item_selected.emit(item)
 

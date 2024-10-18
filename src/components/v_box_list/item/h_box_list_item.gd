@@ -41,7 +41,7 @@ func _gui_input(event: InputEvent) -> void:
 			elif mb.is_pressed():
 				clicked.emit()
 		if mb.button_index == MOUSE_BUTTON_RIGHT:
-			if mb.is_pressed(): 
+			if mb.is_pressed():
 				right_clicked.emit()
 
 
@@ -51,16 +51,16 @@ func _draw():
 			get_theme_stylebox("hover", "Tree"),
 			Rect2(Vector2.ZERO, size)
 		)
-	
+
 	if _is_selected:
 		draw_style_box(
 			get_theme_stylebox("selected", "Tree"),
 			Rect2(Vector2.ZERO, size)
 		)
-	
+
 	draw_line(
-		Vector2(0, size.y + 1), 
-		Vector2(size.x, size.y + 1), 
+		Vector2(0, size.y + 1),
+		Vector2(size.x, size.y + 1),
 		get_theme_color("guide_color", "Tree")
 	)
 
