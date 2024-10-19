@@ -45,7 +45,6 @@ import/fbx/enabled=false
 [godots]
 
 version_hint="4.2.1"
-hierarchy="third-party"
 
 [rendering]
 

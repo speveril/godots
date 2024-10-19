@@ -2,7 +2,7 @@ extends VBoxContainer
 
 @onready var head_button:Button = %HeadButton
 @onready var hideable:Container = %Indenter
-@onready var sub_sections:Container = %SubSections
+@onready var subsections:Container = %SubSections
 @onready var contents:Container = %Contents
 
 var path:String:
@@ -66,10 +66,34 @@ func fix_hideable() -> void:
 func is_empty() -> bool:
 	if path == "/":
 		return false
-	return sub_sections.get_child_count() + contents.get_child_count() == 0
+	return subsections.get_child_count() + contents.get_child_count() == 0
 
 func add_subsection(n:Node):
-	sub_sections.add_child(n)
+	subsections.add_child(n)
+
+func update_visibility():
+	print("[uv ", path, "]")
+	var should_be_visible = false
+	var hideable_visible = hideable.visible
+	hideable.show()
+
+	if path == "/":
+		visible = true
+	if subsections.get_child_count() > 0:
+		print("[uv ", path, "]", "subsections of ", path, ": ", get_subsections())
+		for subsection in get_subsections():
+			subsection.update_visibility()
+			print("[uv ", path, "]", " -> ", subsection, " ", subsection.visible)
+			should_be_visible = should_be_visible or subsection.visible
+		print("[uv ", path, "]", "children of ", path, ": ", get_subsections())
+	if contents.get_child_count() > 0:
+		for item in get_items():
+			print("[uv ", path, "]", " -> ", item, " ", item.visible)
+			should_be_visible = should_be_visible or item.visible
+	print("[uv ", path, "]", path, " => ", should_be_visible)
+
+	visible = should_be_visible
+	hideable.visible = hideable_visible
 
 func add_item(n:Node):
 	if n.get_parent() != null:
@@ -78,7 +102,7 @@ func add_item(n:Node):
 		contents.add_child(n)
 
 func get_subsections() -> Array[Node]:
-	return sub_sections.get_children()
+	return subsections.get_children()
 
 func get_items() -> Array[Node]:
 	return contents.get_children()

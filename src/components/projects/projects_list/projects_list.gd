@@ -123,7 +123,7 @@ func sort_items():
 		)
 		subsection_sort.sort()
 		for i in range(len(subsection_sort)):
-			sec.sub_sections.move_child(_sections[subsection_sort[i]], i)
+			sec.subsections.move_child(_sections[subsection_sort[i]], i)
 
 		var sort_data = sec.get_items().map(
 			func(x): return x.get_sort_data()
@@ -207,22 +207,24 @@ func _update_filters():
 		else:
 			search_term += part
 
-	for item in _items_container.get_children():
-		if item.has_method("apply_filter"):
-			var should_be_visible = item.apply_filter(func(data):
-				var search_path = data['path']
-				if not search_term.contains('/'):
-					search_path = search_path.get_file()
-				var check_path = search_path.findn(search_term) != -1
-				var check_name = data['name'].findn(search_term) != -1
-				var check_term = search_term.is_empty() or check_path or check_name
-				if not search_tag.is_empty():
-					return check_term and _has_tag(data, search_tag)
-				else:
-					return check_term
-			)
-			item.visible = should_be_visible
-
+	for section_path in _sections.keys():
+		var sec = _sections[section_path]
+		for item in sec.get_items():
+			if item.has_method("apply_filter"):
+				var should_be_visible = item.apply_filter(func(data):
+					var search_path = data['path']
+					if not search_term.contains('/'):
+						search_path = search_path.get_file()
+					var check_path = search_path.findn(search_term) != -1
+					var check_name = data['name'].findn(search_term) != -1
+					var check_term = search_term.is_empty() or check_path or check_name
+					if not search_tag.is_empty():
+						return check_term and _has_tag(data, search_tag)
+					else:
+						return check_term
+				)
+				item.visible = should_be_visible
+	_sections["/"].update_visibility()
 
 func _has_tag(tags_source, tag):
 	return Array(tags_source.tags).find(tag) > -1
