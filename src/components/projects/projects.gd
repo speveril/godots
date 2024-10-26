@@ -297,6 +297,7 @@ func _on_projects_list_item_relocate_requested(project:Projects.Item) -> void:
 			if result[0] == Error.OK:
 				var new_project = _projects.add(new_path + "/project.godot", project.editor_path)
 				new_project.hierarchy = project.hierarchy
+				new_project.favorite = project.favorite
 				_projects.erase(project.path)
 				_projects.save()
 				_refresh()
