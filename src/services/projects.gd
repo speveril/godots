@@ -41,6 +41,9 @@ class List extends RefCounted:
 	func erase(project_path) -> void:
 		_projects.erase(project_path)
 		_cfg.erase_section(project_path)
+		var hierarchy = Config.PROJECT_HIERARCHY.ret()
+		hierarchy.erase(project_path)
+		Config.PROJECT_HIERARCHY.put(hierarchy)
 
 	func get_editors_to_bind():
 		return _local_editors.as_option_button_items()

@@ -72,7 +72,6 @@ func add_subsection(n:Node):
 	subsections.add_child(n)
 
 func update_visibility():
-	print("[uv ", path, "]")
 	var should_be_visible = false
 	var hideable_visible = hideable.visible
 	hideable.show()
@@ -80,17 +79,12 @@ func update_visibility():
 	if path == "/":
 		visible = true
 	if subsections.get_child_count() > 0:
-		print("[uv ", path, "]", "subsections of ", path, ": ", get_subsections())
 		for subsection in get_subsections():
 			subsection.update_visibility()
-			print("[uv ", path, "]", " -> ", subsection, " ", subsection.visible)
 			should_be_visible = should_be_visible or subsection.visible
-		print("[uv ", path, "]", "children of ", path, ": ", get_subsections())
 	if contents.get_child_count() > 0:
 		for item in get_items():
-			print("[uv ", path, "]", " -> ", item, " ", item.visible)
 			should_be_visible = should_be_visible or item.visible
-	print("[uv ", path, "]", path, " => ", should_be_visible)
 
 	visible = should_be_visible
 	hideable.visible = hideable_visible

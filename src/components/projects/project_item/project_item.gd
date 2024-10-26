@@ -154,13 +154,6 @@ func _fill_actions(item: Projects.Item):
 		"label": tr("Run"),
 	})
 
-	var edit_hierarchy = Action.from_dict({
-		"key": "hierarchy",
-		"icon": Action.IconTheme.new(self, "Folder", "EditorIcons"),
-		"act": _on_edit_hierarchy.bind(item),
-		"label": tr("Hierarchy")
-	})
-
 	var duplicate = Action.from_dict({
 		"key": "duplicate",
 		"icon": Action.IconTheme.new(self, "Duplicate", "EditorIcons"),
@@ -201,6 +194,13 @@ func _fill_actions(item: Projects.Item):
 		"icon": Action.IconTheme.new(self, "Remove", "EditorIcons"),
 		"act": _on_remove,
 		"label": tr("Remove"),
+	})
+
+	var edit_hierarchy = Action.from_dict({
+		"key": "hierarchy",
+		"icon": Action.IconTheme.new(self, "TreeMonochrome", "EditorIcons"),
+		"act": _on_edit_hierarchy.bind(item),
+		"label": tr("Hierarchy")
 	})
 
 	_actions = Action.List.new([
