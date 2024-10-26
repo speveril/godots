@@ -10,6 +10,7 @@ signal manage_tags_requested(item_tags, all_tags, on_confirm)
 @onready var _install_project_from_zip_dialog = %InstallProjectSimpleDialog
 @onready var _duplicate_project_dialog = %DuplicateProjectDialog
 @onready var _clone_project_dialog = %CloneProjectDialog
+@onready var _relocate_project_dialog = %RelocateProjectDialog
 
 
 var _projects: Projects.List
@@ -54,7 +55,7 @@ func init(projects: Projects.List):
 				pass\
 		}),
 		Action.from_dict({
-			"label": tr("Remove Missing"),
+			"label": tr("Cleanup"),
 			"key": "remove-missing",
 			"icon": Action.IconTheme.new(self, "Clear", "EditorIcons"),
 			"act": func(): remove_missing_popup.popup_centered()
@@ -206,6 +207,12 @@ func _scan_projects(dir_path):
 func _remove_missing():
 	for p in _projects.all().filter(func(x): return x.is_missing):
 		_projects.erase(p.path)
+
+	var hierarchy = Config.PROJECT_HIERARCHY.ret()
+	for p in hierarchy.keys().filter(func(x): return !_projects.has(x)):
+		hierarchy.erase(p)
+	Config.PROJECT_HIERARCHY.put(hierarchy)
+
 	_projects.save()
 	_projects_list.refresh(_projects.all())
 	_projects_list.sort_items()
@@ -214,9 +221,13 @@ func _remove_missing():
 
 
 func _update_remove_missing_disabled():
-	_remove_missing_action.disable(len(
+	var missing_projects = len(
 		_projects.all().filter(func(x): return x.is_missing)
-	) == 0)
+	)
+	var orphaned_hierarchy = len(
+		Config.PROJECT_HIERARCHY.ret().keys().filter(func(x): return !_projects.has(x))
+	)
+	_remove_missing_action.disable(missing_projects == 0 and orphaned_hierarchy == 0)
 
 
 func _on_projects_list_item_selected(item) -> void:
@@ -255,3 +266,131 @@ func _on_projects_list_item_duplicate_requested(project: Projects.Item) -> void:
 		return
 
 	_duplicate_project_dialog.raise(project.name, project)
+
+
+func _on_projects_list_item_relocate_requested(project:Projects.Item) -> void:
+	var path_split:PackedStringArray = project.path.simplify_path().split("/")
+	path_split.remove_at(path_split.size() - 1)
+	var initial_path = "/".join(path_split)
+
+	var _relocate_project_dialog = %RelocateProjectDialog
+	_relocate_project_dialog.show()
+
+	var new_path = _relocate_project_dialog.current_file.simplify_path()
+	if new_path == "" or new_path == initial_path:
+		return
+
+	if FileAccess.file_exists(new_path + "/project.godot"):
+		var d:AcceptDialog = AcceptDialog.new()
+		d.dialog_text = "%s already contains a Godot project!\nCannot relocate." % [new_path]
+		d.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
+		d.position
+		d.exclusive = true
+		get_viewport().add_child(d)
+		d.show()
+		await d.visibility_changed
+	else:
+		var actually_move = func():
+			var wait_dialog = WaitDialog.raise(self, "Relocating \"%s\" to\n%s..." % [project.name, new_path])
+			var result = await _rename_absolute_recursive(initial_path, new_path)
+			wait_dialog.close()
+			if result[0] == Error.OK:
+				var new_project = _projects.add(new_path + "/project.godot", project.editor_path)
+				new_project.hierarchy = project.hierarchy
+				_projects.erase(project.path)
+				_projects.save()
+				_refresh()
+			if result[0] or result[1] != null:
+				var d:AcceptDialog = AcceptDialog.new()
+				d.title = "Relocation " + ("Warning" if result[0] == Error.OK else "Failure")
+				d.dialog_text = ""
+				if result[0] != Error.OK:
+					d.dialog_text += error_string(result[0])
+				if result[0] != Error.OK and result[1] != null:
+					d.dialog_text += ": "
+				if result[1] != null:
+					d.dialog_text += result[1]
+				d.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
+				d.position
+				d.exclusive = true
+				get_viewport().add_child(d)
+				d.show()
+				await d.visibility_changed
+
+		var confirm = true
+		if DirAccess.get_files_at(new_path).size() != 0:
+			confirm = false
+
+			var d:ConfirmationDialogAutoFree = ConfirmationDialogAutoFree.new()
+			d.dialog_text = "%s is not empty.\nAre you sure you want to relocate %s to here?" % [new_path, project.name]
+			d.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
+			d.position
+			d.exclusive = true
+			get_viewport().add_child(d)
+			d.show()
+			d.confirmed.connect(actually_move)
+			await d.visibility_changed
+		else:
+			actually_move.call()
+
+func _rename_absolute_recursive(from_path:String, to_path:String, remove:bool=true, time_box=null) -> Array:
+	var from_dir = DirAccess.open(from_path)
+	from_dir.include_hidden = true
+	DirAccess.make_dir_absolute(to_path)
+
+	var errors = []
+
+	if time_box == null:
+		time_box = [Time.get_ticks_msec()]
+
+	for f in from_dir.get_files():
+		var e = DirAccess.copy_absolute(from_path+"/"+f, to_path+"/"+f)
+		if e: return [e,"Failed to copy "+from_path+"/"+f+" -> "+to_path+"/"+f]
+		e = FileAccess.set_hidden_attribute(to_path+"/"+f, FileAccess.get_hidden_attribute(from_path+"/"+f))
+		if e: return [e,"Could not set hidden attr on "+to_path+"/"+f]
+
+	if Time.get_ticks_msec() - time_box[0] > 0.015:
+		time_box[0] = Time.get_ticks_msec()
+		await get_tree().process_frame
+
+	for d in from_dir.get_directories():
+		var e = await _rename_absolute_recursive(from_path+"/"+d, to_path+"/"+d, false, time_box)
+		if e[0]: return e
+		e = FileAccess.set_hidden_attribute(to_path+"/"+d, FileAccess.get_hidden_attribute(from_path+"/"+d))
+		if e: return [e,"Could not set hidden attr on "+to_path+"/"+d]
+
+	if Time.get_ticks_msec() - time_box[0] > 0.015:
+		time_box[0] = Time.get_ticks_msec()
+		await get_tree().process_frame
+
+	if remove:
+		var e = _remove_absolute_recursive(from_path)
+		if e.keys().size() > 0:
+			return [Error.OK,"Some files could not be cleaned up; you will need to manually delete %s" % from_path]
+	return [Error.OK,null]
+
+func _remove_absolute_recursive(path:String) -> Dictionary:
+	var errors:Dictionary = {};
+
+	var from_dir = DirAccess.open(path)
+	from_dir.include_hidden = true
+
+	for d in from_dir.get_directories():
+		var e = _remove_absolute_recursive(path+"/"+d)
+
+		# merge the error dictionaries
+		for k in e.keys():
+			if !errors.has(k):
+				errors[k] = []
+			for x in e[k]:
+				errors[k].append(x)
+
+	for f in from_dir.get_files():
+		var e = DirAccess.remove_absolute(path+"/"+f)
+		if e:
+			if !errors.has(e):
+				errors[e] = []
+			errors[e].append(path+"/"+f)
+
+	DirAccess.remove_absolute(path)
+	return errors

@@ -4,6 +4,7 @@ signal edited
 signal removed
 signal manage_tags_requested
 signal duplicate_requested
+signal relocate_requested(new_path)
 signal tag_clicked(tag)
 
 @export var _rename_dialog_scene: PackedScene
@@ -203,6 +204,13 @@ func _fill_actions(item: Projects.Item):
 		"label": tr("Hierarchy")
 	})
 
+	var relocate = Action.from_dict({
+		"key": "relocate",
+		"icon": Action.IconTheme.new(self, "Folder", "EditorIcons"),
+		"act": func(): relocate_requested.emit(),
+		"label": tr("Relocate")
+	})
+
 	_actions = Action.List.new([
 		edit,
 		run,
@@ -212,6 +220,7 @@ func _fill_actions(item: Projects.Item):
 		bind_editor,
 		manage_tags,
 		view_command,
+		relocate,
 		remove
 	])
 

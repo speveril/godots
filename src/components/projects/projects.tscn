@@ -60,9 +60,20 @@ visible = false
 unique_name_in_owner = true
 visible = false
 
+[node name="RelocateProjectDialog" type="FileDialog" parent="."]
+unique_name_in_owner = true
+title = "Choose a New Location"
+initial_position = 2
+size = Vector2i(500, 800)
+ok_button_text = "Select Current Folder"
+file_mode = 2
+access = 2
+use_native_dialog = true
+
 [connection signal="item_duplicate_requested" from="ProjectsList" to="." method="_on_projects_list_item_duplicate_requested"]
 [connection signal="item_edited" from="ProjectsList" to="." method="_on_projects_list_item_edited"]
 [connection signal="item_manage_tags_requested" from="ProjectsList" to="." method="_on_projects_list_item_manage_tags_requested"]
+[connection signal="item_relocate_requested" from="ProjectsList" to="." method="_on_projects_list_item_relocate_requested"]
 [connection signal="item_removed" from="ProjectsList" to="." method="_on_projects_list_item_removed"]
 [connection signal="item_selected" from="ProjectsList" to="." method="_on_projects_list_item_selected"]
 

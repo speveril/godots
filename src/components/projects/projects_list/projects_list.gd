@@ -6,6 +6,7 @@ signal item_removed(item_data)
 signal item_edited(item_data)
 signal item_manage_tags_requested(item_data)
 signal item_duplicate_requested(item_data)
+signal item_relocate_requested(item_data)
 
 @export var _section_scene: PackedScene
 @export var _item_scene: PackedScene
@@ -151,6 +152,9 @@ func _post_add(item_data, item_control):
 	)
 	item_control.duplicate_requested.connect(
 		func(): item_duplicate_requested.emit(item_data)
+	)
+	item_control.relocate_requested.connect(
+		func(): item_relocate_requested.emit(item_data)
 	)
 
 func _item_comparator(a, b):
