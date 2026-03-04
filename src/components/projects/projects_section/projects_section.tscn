@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://c1bxi38cgar0a"]
 
-[ext_resource type="Script" path="res://src/components/projects/projects_section/projects_section.gd" id="1_stjll"]
+[ext_resource type="Script" uid="uid://gpeh1bljjucr" path="res://src/components/projects/projects_section/projects_section.gd" id="1_stjll"]
 [ext_resource type="Texture2D" uid="uid://dc17ai8ghw5mx" path="res://theme/icons-light/GuiTreeArrowRight.svg" id="2_sqabc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jxv3i"]
@@ -45,10 +45,12 @@ unique_name_in_owner = true
 layout_mode = 2
 
 [node name="Spacer" type="Control" parent="Indenter"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(28, 0)
 layout_mode = 2
 
-[node name="ColorRect" type="ColorRect" parent="Indenter"]
+[node name="BgColor" type="ColorRect" parent="Indenter"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(2, 0)
 layout_mode = 2
 color = Color(0.219608, 0.219608, 0.219608, 1)

@@ -1,9 +1,13 @@
+class_name ProjectSectionControl
 extends VBoxContainer
 
 @onready var head_button:Button = %HeadButton
 @onready var hideable:Container = %Indenter
 @onready var subsections:Container = %SubSections
 @onready var contents:Container = %Contents
+
+@onready var _indent_bg:ColorRect = %BgColor
+@onready var _indent_spacer:Control = %Spacer
 
 var path:String:
 	set(x):
@@ -18,7 +22,8 @@ var is_root:bool = false:
 var open:bool:
 	set(x):
 		_open = x
-		var closed = Config.CLOSED_SECTIONS.ret()
+		var closed:Array[String] = []
+		closed.assign(Config.CLOSED_SECTIONS.ret() as Array)
 		if _open:
 			closed.erase(path)
 		else:
@@ -28,8 +33,8 @@ var open:bool:
 	get: return _open
 var _open:bool
 
-func _ready():
-	_open = !Config.CLOSED_SECTIONS.ret().has(path)
+func _ready() -> void:
+	_open = !(Config.CLOSED_SECTIONS.ret() as Array[String]).has(path)
 	fix_is_root()
 	fix_hideable()
 	head_button.text = path
@@ -41,15 +46,13 @@ func fix_is_root() -> void:
 	if is_root:
 		head_button.hide()
 		hideable.visible = true
-		$ColorRect.hide()
-		$Indenter/ColorRect.hide()
-		$Indenter/Spacer.hide()
+		_indent_bg.hide()
+		_indent_spacer.hide()
 	else:
 		head_button.show()
 		fix_hideable()
-		$ColorRect.show()
-		$Indenter/ColorRect.show()
-		$Indenter/Spacer.show()
+		_indent_bg.show()
+		_indent_spacer.show()
 
 func fix_hideable() -> void:
 	if !is_node_ready():
@@ -68,12 +71,12 @@ func is_empty() -> bool:
 		return false
 	return subsections.get_child_count() + contents.get_child_count() == 0
 
-func add_subsection(n:Node):
+func add_subsection(n:ProjectSectionControl) -> void:
 	subsections.add_child(n)
 
-func update_visibility():
-	var should_be_visible = false
-	var hideable_visible = hideable.visible
+func update_visibility() -> void:
+	var should_be_visible := false
+	var hideable_visible := hideable.visible
 	hideable.show()
 
 	if path == "/":
@@ -89,17 +92,27 @@ func update_visibility():
 	visible = should_be_visible
 	hideable.visible = hideable_visible
 
-func add_item(n:Node):
+func add_item(n:ProjectListItemControl) -> void:
 	if n.get_parent() != null:
 		n.reparent(contents)
 	else:
 		contents.add_child(n)
 
-func get_subsections() -> Array[Node]:
-	return subsections.get_children()
+func get_subsections() -> Array[ProjectSectionControl]:
+	var rtn:Array[ProjectSectionControl] = []
+	rtn.assign(subsections.get_children())
+	return rtn
 
-func get_items() -> Array[Node]:
-	return contents.get_children()
+func get_items() -> Array[ProjectListItemControl]:
+	var rtn:Array[ProjectListItemControl] = []
+	rtn.assign(contents.get_children())
+	return rtn
 
-func _on_pressed_head_button():
+func deselect() -> void:
+	for subsection in get_subsections():
+		subsection.deselect()
+	for item in get_items():
+		item.deselect()
+
+func _on_pressed_head_button() -> void:
 	open = !open

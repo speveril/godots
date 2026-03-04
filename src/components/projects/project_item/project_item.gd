@@ -201,7 +201,8 @@ func _fill_actions(item: Projects.Item) -> void:
 		"key": "show-in-file-manager",
 		"icon": Action.IconTheme.new(self, "Filesystem", "EditorIcons"),
 		"act": _show_in_file_manager.bind(item),
-		"label": tr("Show in File Manager"),
+		"label": tr("Show in File Manager")
+	})
 
 	var edit_hierarchy := Action.from_dict({
 		"key": "hierarchy",
@@ -210,10 +211,10 @@ func _fill_actions(item: Projects.Item) -> void:
 		"label": tr("Hierarchy")
 	})
 
-	var relocate = Action.from_dict({
+	var relocate := Action.from_dict({
 		"key": "relocate",
 		"icon": Action.IconTheme.new(self, "Folder", "EditorIcons"),
-		"act": func(): relocate_requested.emit(),
+		"act": func() -> void: relocate_requested.emit(),
 		"label": tr("Relocate")
 	})
 
@@ -368,13 +369,13 @@ func _on_rebind_editor(item: Projects.Item) -> void:
 	add_child(bind_dialog)
 	bind_dialog.popup_centered()
 
-func _on_edit_hierarchy(item):
-	var dialog = _edit_hierarchy_dialog_scene.instantiate()
+func _on_edit_hierarchy(item: Projects.Item) -> void:
+	var dialog: RenameDialog = _edit_hierarchy_dialog_scene.instantiate()
 	add_child(dialog)
 	dialog.popup_centered()
-	dialog.init(item.hierarchy)
+	dialog.init(item.hierarchy as String)
 	dialog.title = "Set Hierarchy..."
-	dialog.rename_done.connect(func(new_name):
+	dialog.rename_done.connect(func(new_name: String) -> void:
 		item.hierarchy = new_name
 		edited.emit()
 	)
@@ -472,7 +473,7 @@ func get_sort_data() -> Dictionary:
 	return _sort_data
 
 
-func get_section():
+func get_section() -> String:
 	return _sort_data.hierarchy
 
 

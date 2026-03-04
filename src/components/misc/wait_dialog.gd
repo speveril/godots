@@ -1,7 +1,7 @@
 class_name WaitDialog extends AcceptDialog
 
-static func raise(caller:Node, text:String):
-	var dialog = WaitDialog.new()
+static func raise(caller:Node, text:String) -> WaitDialog:
+	var dialog := WaitDialog.new()
 	dialog.title = "Please wait"
 	dialog.dialog_text = text
 	dialog.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
@@ -12,12 +12,12 @@ static func raise(caller:Node, text:String):
 	dialog.show()
 	return dialog
 
-static func raise_with_signal(caller:Node, text:String, done_signal:Signal):
-	var dialog = raise(caller, text)
+static func raise_with_signal(caller:Node, text:String, done_signal:Signal) -> WaitDialog:
+	var dialog := raise(caller, text)
 	done_signal.connect(dialog.close, CONNECT_ONE_SHOT)
 	return dialog
 
-func close():
+func close() -> void:
 	hide()
 	get_parent().remove_child(self)
 	queue_free()

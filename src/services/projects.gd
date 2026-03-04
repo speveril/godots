@@ -41,7 +41,7 @@ class List extends RefCounted:
 	func erase(project_path: String) -> void:
 		_projects.erase(project_path)
 		_cfg.erase_section(project_path)
-		var hierarchy := Config.PROJECT_HIERARCHY.ret()
+		var hierarchy := Config.PROJECT_HIERARCHY.ret() as Dictionary[String, String]
 		hierarchy.erase(project_path)
 		Config.PROJECT_HIERARCHY.put(hierarchy)
 	
@@ -101,12 +101,12 @@ class Item:
 		get: return _external_project_info.name
 		set(value): _external_project_info.name = value
 	
-	var hierarchy:
+	var hierarchy: String:
 		set(value):
-			var hierarchy = Config.PROJECT_HIERARCHY.ret()
+			var hierarchy:Dictionary[String,String] = Config.PROJECT_HIERARCHY.ret()
 			hierarchy[path] = value
 			Config.PROJECT_HIERARCHY.put(hierarchy)
-		get: return Config.PROJECT_HIERARCHY.ret().get(path, "")
+		get: return (Config.PROJECT_HIERARCHY.ret() as Dictionary).get(path, "") as String
 
 	var editor_name: String:
 		get: return _get_editor_name()

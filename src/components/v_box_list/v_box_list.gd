@@ -54,7 +54,7 @@ func add(item_data: Object) -> void:
 	item_control.connect("clicked", _select_item.bind(item_control))
 	item_control.connect("right_clicked", _select_item.bind(item_control))
 	if item_control.has_signal("tag_clicked"):
-		item_control.tag_clicked.connect(
+		item_control.connect("tag_clicked", 
 			func(tag: String) -> void: 
 				set_search_box_text("tag:%s" % tag)
 				_search_box.grab_focus()
@@ -117,7 +117,7 @@ func _update_filters() -> void:
 
 	for item: Control in _items_container.get_children():
 		if item.has_method("apply_filter"):
-			var should_be_visible: bool = item.apply_filter(func(data: Dictionary):
+			var should_be_visible: bool = item.call("apply_filter", func(data: Dictionary) -> bool:
 				var search_path := data['path'] as String
 				if not search_term.contains('/'):
 					search_path = search_path.get_file()

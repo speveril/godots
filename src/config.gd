@@ -170,15 +170,15 @@ var REMEMBER_WINDOW_SIZE := ConfigFileValue.new(
 ):
 	set(_v): _readonly()
 
-var PROJECT_HIERARCHY = ConfigFileValue.new(
-	_cfg_auto_save,
+var PROJECT_HIERARCHY := ConfigFileValue.new(
+	_cfg_auto_save.as_config_like(),
 	"app",
 	"project_hierarchy",
-	{}
+	{} as Dictionary[String,String]
 ):
 	set(_v): _readonly()
 
-var CLOSED_SECTIONS = ConfigFileValue.new(
+var CLOSED_SECTIONS := ConfigFileValue.new(
 	_cfg_auto_save.as_config_like(),
 	"app",
 	"closed_sections",

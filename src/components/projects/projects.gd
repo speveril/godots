@@ -11,7 +11,7 @@ signal manage_tags_requested(item_tags: Array, all_tags: Array, on_confirm: Call
 @onready var _install_project_from_zip_dialog: InstallProjectSimpleDialog = %InstallProjectSimpleDialog
 @onready var _duplicate_project_dialog: DuplicateProjectDialog = %DuplicateProjectDialog
 @onready var _clone_project_dialog: CloneProjectDialog = %CloneProjectDialog
-@onready var _relocate_project_dialog: DuplicateProjectDialog = %RelocateProjectDialog
+@onready var _relocate_project_dialog: FileDialog = %RelocateProjectDialog
 
 
 var _projects: Projects.List
@@ -210,8 +210,8 @@ func _remove_missing() -> void:
 	for p: Projects.Item in _projects.all().filter(func(x: Projects.Item) -> bool: return x.is_missing):
 		_projects.erase(p.path)
 
-	var hierarchy = Config.PROJECT_HIERARCHY.ret()
-	for p in hierarchy.keys().filter(func(x): return !_projects.has(x)):
+	var hierarchy := _get_hierarchy_dict()
+	for p: Projects.Item in hierarchy.keys().filter(func(x: String) -> bool: return !_projects.has(x)):
 		hierarchy.erase(p)
 	Config.PROJECT_HIERARCHY.put(hierarchy)
 
@@ -223,11 +223,11 @@ func _remove_missing() -> void:
 
 
 func _update_remove_missing_disabled() -> void:
-	var missing_projects = len(
+	var missing_projects := len(
 		_projects.all().filter(func(x: Projects.Item) -> bool: return x.is_missing)
 	)
-	var orphaned_hierarchy = len(
-		Config.PROJECT_HIERARCHY.ret().keys().filter(func(x: Projects.Item) -> bool: return !_projects.has(x))
+	var orphaned_hierarchy := len(
+		_get_hierarchy_dict().keys().filter(func(x: String) -> bool: return !_projects.has(x))
 	)
 	_remove_missing_action.disable(missing_projects == 0 and orphaned_hierarchy == 0)
 
@@ -273,12 +273,12 @@ func _on_projects_list_item_duplicate_requested(project: Projects.Item) -> void:
 func _on_projects_list_item_relocate_requested(project:Projects.Item) -> void:
 	var path_split:PackedStringArray = project.path.simplify_path().split("/")
 	path_split.remove_at(path_split.size() - 1)
-	var initial_path = "/".join(path_split)
+	var initial_path := "/".join(path_split)
 
-	var _relocate_project_dialog = %RelocateProjectDialog
+	var _relocate_project_dialog: FileDialog = %RelocateProjectDialog
 	_relocate_project_dialog.show()
 
-	var new_path = _relocate_project_dialog.current_file.simplify_path()
+	var new_path := _relocate_project_dialog.current_file.simplify_path()
 	if new_path == "" or new_path == initial_path:
 		return
 
@@ -286,18 +286,17 @@ func _on_projects_list_item_relocate_requested(project:Projects.Item) -> void:
 		var d:AcceptDialog = AcceptDialog.new()
 		d.dialog_text = "%s already contains a Godot project!\nCannot relocate." % [new_path]
 		d.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
-		d.position
 		d.exclusive = true
 		get_viewport().add_child(d)
 		d.show()
 		await d.visibility_changed
 	else:
-		var actually_move = func():
-			var wait_dialog = WaitDialog.raise(self, "Relocating \"%s\" to\n%s..." % [project.name, new_path])
-			var result = await _rename_absolute_recursive(initial_path, new_path)
+		var actually_move := func() -> void:
+			var wait_dialog := WaitDialog.raise(self, "Relocating \"%s\" to\n%s..." % [project.name, new_path])
+			var result := await _rename_absolute_recursive(initial_path, new_path)
 			wait_dialog.close()
 			if result[0] == Error.OK:
-				var new_project = _projects.add(new_path + "/project.godot", project.editor_path)
+				var new_project := _projects.add(new_path + "/project.godot", project.editor_path)
 				new_project.hierarchy = project.hierarchy
 				new_project.favorite = project.favorite
 				_projects.erase(project.path)
@@ -308,26 +307,24 @@ func _on_projects_list_item_relocate_requested(project:Projects.Item) -> void:
 				d.title = "Relocation " + ("Warning" if result[0] == Error.OK else "Failure")
 				d.dialog_text = ""
 				if result[0] != Error.OK:
-					d.dialog_text += error_string(result[0])
+					d.dialog_text += error_string(result[0] as int)
 				if result[0] != Error.OK and result[1] != null:
 					d.dialog_text += ": "
 				if result[1] != null:
 					d.dialog_text += result[1]
 				d.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
-				d.position
 				d.exclusive = true
 				get_viewport().add_child(d)
 				d.show()
 				await d.visibility_changed
 
-		var confirm = true
+		var confirm := true
 		if DirAccess.get_files_at(new_path).size() != 0:
 			confirm = false
 
 			var d:ConfirmationDialogAutoFree = ConfirmationDialogAutoFree.new()
 			d.dialog_text = "%s is not empty.\nAre you sure you want to relocate %s to here?" % [new_path, project.name]
 			d.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
-			d.position
 			d.exclusive = true
 			get_viewport().add_child(d)
 			d.show()
@@ -336,18 +333,18 @@ func _on_projects_list_item_relocate_requested(project:Projects.Item) -> void:
 		else:
 			actually_move.call()
 
-func _rename_absolute_recursive(from_path:String, to_path:String, remove:bool=true, time_box=null) -> Array:
-	var from_dir = DirAccess.open(from_path)
+func _rename_absolute_recursive(from_path:String, to_path:String, remove:bool=true, time_box:Variant=null) -> Array:
+	var from_dir := DirAccess.open(from_path)
 	from_dir.include_hidden = true
 	DirAccess.make_dir_absolute(to_path)
 
-	var errors = []
+	var errors := []
 
 	if time_box == null:
 		time_box = [Time.get_ticks_msec()]
 
 	for f in from_dir.get_files():
-		var e = DirAccess.copy_absolute(from_path+"/"+f, to_path+"/"+f)
+		var e := DirAccess.copy_absolute(from_path+"/"+f, to_path+"/"+f)
 		if e: return [e,"Failed to copy "+from_path+"/"+f+" -> "+to_path+"/"+f]
 		e = FileAccess.set_hidden_attribute(to_path+"/"+f, FileAccess.get_hidden_attribute(from_path+"/"+f))
 		if e: return [e,"Could not set hidden attr on "+to_path+"/"+f]
@@ -357,39 +354,39 @@ func _rename_absolute_recursive(from_path:String, to_path:String, remove:bool=tr
 		await get_tree().process_frame
 
 	for d in from_dir.get_directories():
-		var e = await _rename_absolute_recursive(from_path+"/"+d, to_path+"/"+d, false, time_box)
+		var e := await _rename_absolute_recursive(from_path+"/"+d, to_path+"/"+d, false, time_box)
 		if e[0]: return e
-		e = FileAccess.set_hidden_attribute(to_path+"/"+d, FileAccess.get_hidden_attribute(from_path+"/"+d))
-		if e: return [e,"Could not set hidden attr on "+to_path+"/"+d]
+		var err := FileAccess.set_hidden_attribute(to_path+"/"+d, FileAccess.get_hidden_attribute(from_path+"/"+d))
+		if e: return [err,"Could not set hidden attr on "+to_path+"/"+d]
 
 	if Time.get_ticks_msec() - time_box[0] > 0.015:
 		time_box[0] = Time.get_ticks_msec()
 		await get_tree().process_frame
 
 	if remove:
-		var e = _remove_absolute_recursive(from_path)
+		var e := _remove_absolute_recursive(from_path)
 		if e.keys().size() > 0:
 			return [Error.OK,"Some files could not be cleaned up; you will need to manually delete %s" % from_path]
 	return [Error.OK,null]
 
 func _remove_absolute_recursive(path:String) -> Dictionary:
-	var errors:Dictionary = {};
+	var errors:Dictionary[Error, Array] = {};
 
-	var from_dir = DirAccess.open(path)
+	var from_dir := DirAccess.open(path)
 	from_dir.include_hidden = true
 
 	for d in from_dir.get_directories():
-		var e = _remove_absolute_recursive(path+"/"+d)
+		var e := _remove_absolute_recursive(path+"/"+d)
 
 		# merge the error dictionaries
-		for k in e.keys():
+		for k:Error in e.keys():
 			if !errors.has(k):
 				errors[k] = []
-			for x in e[k]:
+			for x:String in e[k]:
 				errors[k].append(x)
 
 	for f in from_dir.get_files():
-		var e = DirAccess.remove_absolute(path+"/"+f)
+		var e := DirAccess.remove_absolute(path+"/"+f)
 		if e:
 			if !errors.has(e):
 				errors[e] = []
@@ -397,3 +394,8 @@ func _remove_absolute_recursive(path:String) -> Dictionary:
 
 	DirAccess.remove_absolute(path)
 	return errors
+
+func _get_hierarchy_dict() -> Dictionary[String, String]:
+	var rtn:Dictionary[String, String] = {}
+	rtn.assign(Config.PROJECT_HIERARCHY.ret() as Dictionary)
+	return rtn
